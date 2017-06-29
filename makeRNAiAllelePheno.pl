@@ -35,7 +35,7 @@ print scalar @alleleGene, " genes found with Allele.\n";
 #------------------Build Phenotype Description table ------------
 
 open (OUT, ">RNAiAllelePheno.csv") || die "cannot open $!\n";
-print OUT "Gene\tRNAi Phenotype Observed\tRNAi Phenotype Not Observed\tAllele Phenotype Observed\tAllele Phenotype Not Observed\n";
+print OUT "WormBase Gene ID\tRNAi Phenotype Observed\tRNAi Phenotype Not Observed\tAllele Phenotype Observed\tAllele Phenotype Not Observed\n";
 
 $query="QUERY FIND Gene WBGene*";
 my @gene = $db->find($query);

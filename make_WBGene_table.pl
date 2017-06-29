@@ -17,6 +17,9 @@ my %geneCDS;
 my @otherNameList;
 my ($w0, $w1); #for wormpep
 
+
+#------------- Get transcript names ---------------------------------------------
+
 open (CDS, "/home/wen/simpleMine/ace_files/WBGeneTranscript.ace") || die "can't open WBGeneTranscript.ace!";
 while ($line=<CDS>) {
     if ($line =~ /^Gene/) {
@@ -34,11 +37,30 @@ while ($line=<CDS>) {
     }
 }
 close (CDS);
+#--------------------------- done getting transcript names -------------------------------
+
+
+#---------------- Get Public names ------------------------------------
+open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't open WBGeneIdentity.ace!";
+while ($line =<IN>) {
+    chomp($line);
+    if ($line =~ /^Gene/) {
+	@tmp = split '"', $line;
+	$g = $tmp[1];
+	$pub_name = "N.A.";
+    } elsif ($line =~ /^Public_name/) {
+	@tmp = split '"', $line;
+	$pub_name = $tmp[1];
+	$pubName{$pub_name} = $g;
+    }
+}
+close (IN);
+#------------ done  getting public name ------------------------------
 
 open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't open WBGeneIdentity.ace!";
 open (OUT, ">WBGeneName.csv") || die "cannot open WBGeneName.csv!\n";
 
-print OUT "Gene\tPublic Name\tStatus\tSequence Name\tTranscript\tWormPep\tUniprot\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
+print OUT "WormBase Gene ID\tPublic Name\tStatus\tSequence Name\tOther Name\tTranscript\tWormPep\tUniprot\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
 
 $id = 0;
 $id_a = 0;
@@ -60,6 +82,7 @@ while ($line =<IN>) {
 	$refSeqProtein = "N.A.";
 	$status = "N.A.";
 	$merged_into = "N.A.";
+	$other_name = "N.A.";
 
 	$id++;
 	print GENES "$id\t$g\n";
@@ -99,22 +122,20 @@ while ($line =<IN>) {
 
 	$id_a++;
 	#print ALIAS "$id_a\t$mol_name\t$g\n";
-
-     } elsif ($line =~ /^Other_name/) {
-	@tmp = split '"', $line;
-	$other_name = $tmp[1];
-	$otherName{$other_name} = $g;
-	$otherNameList[$oth] = $other_name;
-	$oth++;
     } elsif ($line =~ /^Public_name/) {
 	@tmp = split '"', $line;
 	$pub_name = $tmp[1];
-	$pubName{$pub_name} = $g;
-
-	$id_a++;
-	#print ALIAS "$id_a\t$pub_name\t$g\n";
-	$id_c++;
-	#print COMMON "$id_c\t$g\t$pub_name\n";
+    } elsif ($line =~ /^Other_name/) {
+	@tmp = split '"', $line;
+	if ($publicName{$tm[1]}) {
+	    #do not take it since this name is a public name for another gene
+	} else {
+	    if ($other_name eq "N.A.") {
+		$other_name = $tmp[1];
+	    } else {
+		$other_name = join ",",  $other_name, $tmp[1];
+	    }
+	}
     }  elsif ($line =~ /UniProt/) {
 	@tmp = split '"', $line;
 
@@ -163,20 +184,10 @@ while ($line =<IN>) {
 	    $cds = "N.A.";
 	}
 
-	print OUT "$g\t$pub_name\t$status\t$seq_name\t$cds\t$wormpep\t$uniprot\t$treefam\t$refSeqRNA\t$refSeqProtein\n";
+	print OUT "$g\t$pub_name\t$status\t$seq_name\t$other_name\t$cds\t$wormpep\t$uniprot\t$treefam\t$refSeqRNA\t$refSeqProtein\n";
     }
 }
 
-foreach $other_name (@otherNameList) {
-    if ($pubName{$other_name}) {
-	#print "$other_name was already used as a public name for $pubName{$other_name}\n"; 
-    } else {
-	if ($otherName{$other_name}) {
-	    $id_a++;
-	    #print ALIAS "$id_a\t$other_name\t$otherName{$other_name}\n";
-	}
-    }
-}
 
 close (IN);
 #close (ALIAS);

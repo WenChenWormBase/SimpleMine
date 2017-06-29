@@ -41,7 +41,7 @@ print scalar @gene, " genes total found in ACeDB.\n";
 
 #-----------------Build Gene - Tissue table---------------------------
 open (OUT1, ">GeneTissueLifeStage.csv") || die "cannot open $!\n";
-print OUT1 "Gene ID\tExpr_pattern Tissue\tGenomic Study Tissue\tExpr_pattern LifeStage\tGenomic Study LifeStage\n";
+print OUT1 "WormBase Gene ID\tExpr_pattern Tissue\tGenomic Study Tissue\tExpr_pattern LifeStage\tGenomic Study LifeStage\n";
 
 my ($epAOlist, $epLSlist, $ecAOlist, $ecLSlist);
 foreach $g (@gene) {
