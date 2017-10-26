@@ -9,6 +9,8 @@ print "Output file: WBGeneName.csv\n\n";
 print "Parse Gene names ...";
 
 my ($line, $g, $cds, $pub_name, $merged_into, $status, $seq_name, $wormpep, $uniprot, $treefam, $refSeqRNA, $refSeqProtein, $other_name, $mol_name);
+my @ceGenes;
+my $ceID = 0;
 my @tmp;
 my %otherName;
 my %pubName;
@@ -25,7 +27,7 @@ while ($line=<CDS>) {
     if ($line =~ /^Gene/) {
 	@tmp = split '"', $line;
 	$g = $tmp[1];
-    } elsif (($line =~ /^Corresponding_transcript/) || ($line =~ /^Corresponding_CDS/)) {
+    } elsif ($line =~ /^Corresponding_transcript/) {
 	@tmp = split '"', $line;
 	$cds = $tmp[1];
 	#$cdsGene{$cds} = $g; 
@@ -59,6 +61,7 @@ close (IN);
 
 open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't open WBGeneIdentity.ace!";
 open (OUT, ">WBGeneName.csv") || die "cannot open WBGeneName.csv!\n";
+open (CEG, ">AllCelegansGenes.txt") || die "cannot open AllCelegansGenes.txt!\n";
 
 print OUT "WormBase Gene ID\tPublic Name\tStatus\tSequence Name\tOther Name\tTranscript\tWormPep\tUniprot\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
 
@@ -95,6 +98,11 @@ while ($line =<IN>) {
 	} else {
 	    $status = "Dead";
 	}
+
+    } elsif ($line =~ /Caenorhabditis elegans/) {
+	$ceGenes[$ceID] = $g;
+	$ceID++;	
+
     } elsif ($line =~ /^Merged_into/) {
 	@tmp = split '"', $line;
 	$merged_into = $tmp[1];
@@ -188,6 +196,11 @@ while ($line =<IN>) {
     }
 }
 
+foreach $g (@ceGenes) {
+    print CEG "$g\n";
+}
+print "$ceID C. elegans genes found.\n";
+close (CEG);
 
 close (IN);
 #close (ALIAS);
