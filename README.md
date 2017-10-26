@@ -14,3 +14,7 @@ create tissue and life stage table.
 
 5. makeHomologDiseaseAssociation.pl
 create disease association and human homolog table
+
+6. getGeneReference.pl
+Create a table with WBPaper ID and PubMed ID for each gene
+
