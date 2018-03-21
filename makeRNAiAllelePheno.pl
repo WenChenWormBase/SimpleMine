@@ -37,6 +37,10 @@ print scalar @alleleGene, " genes found with Allele.\n";
 open (OUT, ">RNAiAllelePheno.csv") || die "cannot open $!\n";
 print OUT "WormBase Gene ID\tRNAi Phenotype Observed\tRNAi Phenotype Not Observed\tAllele Phenotype Observed\tAllele Phenotype Not Observed\n";
 
+open (OUT1, ">RNAiAllelePhenoObserved.csv") || die "cannot open $!\n";
+print OUT1 "WormBase Gene ID\tRNAi Phenotype Observed\tAllele Phenotype Observed\n";
+
+
 $query="QUERY FIND Gene WBGene*";
 my @gene = $db->find($query);
 print scalar @gene, " genes total found in ACeDB.\n";
@@ -53,7 +57,7 @@ foreach $g (@gene) {
 	if ($totalResult == 0) {
 	    $RNAiPhe = "N.A.";
 	} else {
-	    $RNAiPhe = join ",", @tmp;
+	    $RNAiPhe = join ", ", @tmp;
 	}
 
 	#get RNAi Not_observed phenotype
@@ -64,7 +68,7 @@ foreach $g (@gene) {
 	if ($totalResult == 0) {
 	    $RNAiNotPhe = "N.A.";
 	} else {
-	    $RNAiNotPhe = join ",", @tmp;
+	    $RNAiNotPhe = join ", ", @tmp;
 	}
     } else {
 	$RNAiPhe = "N.A.";
@@ -80,7 +84,7 @@ foreach $g (@gene) {
 	if ($totalResult == 0) {
 	    $AllelePhe = "N.A.";
 	} else {
-	    $AllelePhe = join ",", @tmp;
+	    $AllelePhe = join ", ", @tmp;
 	}
 
 	#get Allele Not_observed Phenotype
@@ -91,15 +95,17 @@ foreach $g (@gene) {
 	if ($totalResult == 0) {
 	    $AlleleNotPhe = "N.A.";
 	} else {
-	    $AlleleNotPhe = join ",", @tmp;
+	    $AlleleNotPhe = join ", ", @tmp;
 	}
     } else {
 	$AllelePhe = "N.A.";
 	$AlleleNotPhe = "N.A.";
     }
     print OUT "$g\t$RNAiPhe\t$RNAiNotPhe\t$AllelePhe\t$AlleleNotPhe\n";
+    print OUT1 "$g\t$RNAiPhe\t$AllelePhe\n";
     
 }
 
 close (OUT);
+close (OUT1);
 $db->close();
