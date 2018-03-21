@@ -32,7 +32,7 @@ while ($line=<CDS>) {
 	$cds = $tmp[1];
 	#$cdsGene{$cds} = $g; 
 	if ($geneCDS{$g}){
-	    $geneCDS{$g} = join ",", $geneCDS{$g}, $cds;
+	    $geneCDS{$g} = join ", ", $geneCDS{$g}, $cds;
 	} else {
 	    $geneCDS{$g} = $cds;
         }
@@ -63,7 +63,7 @@ open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't ope
 open (OUT, ">WBGeneName.csv") || die "cannot open WBGeneName.csv!\n";
 open (CEG, ">AllCelegansGenes.txt") || die "cannot open AllCelegansGenes.txt!\n";
 
-print OUT "WormBase Gene ID\tPublic Name\tStatus\tSequence Name\tOther Name\tTranscript\tWormPep\tUniprot\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
+print OUT "WormBase Gene ID\tPublic Name\tWormBase Status\tSequence Name\tOther Name\tTranscript\tWormPep\tUniprot\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
 
 $id = 0;
 $id_a = 0;
@@ -123,7 +123,7 @@ while ($line =<IN>) {
 	    if ($wormpep eq "N.A.") {
 		$wormpep = $w1;
 	    } else {
-		$wormpep = join ",",  $wormpep, $w1;
+		$wormpep = join ", ",  $wormpep, $w1;
 	    }
 
 	}
@@ -141,7 +141,7 @@ while ($line =<IN>) {
 	    if ($other_name eq "N.A.") {
 		$other_name = $tmp[1];
 	    } else {
-		$other_name = join ",",  $other_name, $tmp[1];
+		$other_name = join ", ",  $other_name, $tmp[1];
 	    }
 	}
     }  elsif ($line =~ /UniProt/) {
@@ -153,7 +153,7 @@ while ($line =<IN>) {
 	if ($uniprot eq "N.A.") {
 	    $uniprot = $tmp[5];
 	} else {
-	    $uniprot = join ",",  $uniprot, $tmp[5];
+	    $uniprot = join ", ",  $uniprot, $tmp[5];
 	}
 
     }  elsif ($line =~ /TREEFAM/) {
@@ -172,7 +172,7 @@ while ($line =<IN>) {
 	if ($refSeqRNA eq "N.A.") {
 	    $refSeqRNA = $tmp[5];
 	} else {
-	    $refSeqRNA = join ",",  $refSeqRNA, $tmp[5];
+	    $refSeqRNA = join ", ",  $refSeqRNA, $tmp[5];
 	}
     }  elsif (($line =~ /RefSeq/) && ($line =~ /protein/)) {
 	@tmp = split '"', $line;
@@ -183,7 +183,7 @@ while ($line =<IN>) {
 	if ($refSeqProtein eq "N.A.") {
 	    $refSeqProtein = $tmp[5];
 	} else {
-	    $refSeqProtein = join ",",  $refSeqProtein, $tmp[5];
+	    $refSeqProtein = join ", ",  $refSeqProtein, $tmp[5];
 	}
     } elsif  ($line eq "") {
 	if ($geneCDS{$g}) {
