@@ -59,11 +59,11 @@ while ($line=<ORTHO>) {
 	($spe, $humanid, $humanName, $evidence) = split /\t/, $line;
 	
 	if ($humanOrtho eq "") {
-	    $humanOrtho = join '|', $humanid, $evidence;
+	    $humanOrtho = join " \| ", $humanid, $evidence;
 	    
 	} else {
-	    $humanOrthoSingle = join '|', $humanid, $evidence;
-	    $humanOrtho = join ',', $humanOrtho, $humanOrthoSingle;
+	    $humanOrthoSingle = join " \| ", $humanid, $evidence;
+	    $humanOrtho = join ", ", $humanOrtho, $humanOrthoSingle;
 	}
     }
 }
@@ -99,9 +99,9 @@ while ($line=<DAF>) {
 	$doName = "N.A.";
     }
     
-    $doEntry = join '|', $doName, $evidence, $doTerm, $omim;
+    $doEntry = join " \| ", $doName, $evidence, $doTerm, $omim;
     if ($diseaseInfo{$geneid}) {
-	$diseaseInfo{$geneid} = join ',', $diseaseInfo{$geneid}, $doEntry;
+	$diseaseInfo{$geneid} = join ", ", $diseaseInfo{$geneid}, $doEntry;
     } else {
 	$diseaseInfo{$geneid} = $doEntry;
 	$totalDiseaseGene++;
