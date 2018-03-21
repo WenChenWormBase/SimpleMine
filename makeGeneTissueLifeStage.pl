@@ -56,7 +56,7 @@ foreach $g (@gene) {
 	if  ($totalTissue == 0) {
 	    $epAOlist = "N.A.";
 	} else {
-	    $epAOlist = join ",", @AO; 
+	    $epAOlist = join ", ", @AO; 
 	}
     } else {
 	$epAOlist = "N.A.";
@@ -73,7 +73,7 @@ foreach $g (@gene) {
 	if  ($totalTissue == 0) {
 	    $ecAOlist = "N.A.";
 	} else {
-	    $ecAOlist = join ",", @AO; 
+	    $ecAOlist = join ", ", @AO; 
 	}
     } else {
 	$ecAOlist = "N.A.";
@@ -89,7 +89,7 @@ foreach $g (@gene) {
 	if  ($totalLifeStage == 0) {
 	    $epLSlist = "N.A.";
 	} else {
-	    $epLSlist = join ",", @LS;
+	    $epLSlist = join ", ", @LS;
 	    #print OUT1 "$LSlist";
 	}
     } else {
@@ -107,7 +107,7 @@ foreach $g (@gene) {
 	 if  ($totalLifeStage == 0) {
 	     $ecLSlist = "N.A.";
 	 } else {
-	     $ecLSlist = join ",", @LS;
+	     $ecLSlist = join ", ", @LS;
 	 }
      } else {
 	 $ecLSlist = "N.A.";
