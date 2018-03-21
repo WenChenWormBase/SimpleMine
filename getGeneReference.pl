@@ -35,7 +35,7 @@ print "$totalPaper WormBase papers found with medline accession number.\n";
 #my %geneRef;
 #my %geneRefCount;
 my %paperPrimary;
-my ($gene, $ref, $totalRef, $geneRef, $genePubMedRef);
+my ($gene, $ref, $totalRef, $geneRef, $genePubMedRef, $combRef);
 
 #get the list of all primary research articles
 $query="QUERY FIND Paper Type = Journal_article";
@@ -47,13 +47,15 @@ foreach $paper (@paperList) {
 
 #get the list of genes associated with primary research articles
 open (OUT, ">GeneReference.csv") || die "cannot open $!\n";
-print OUT "WormBase Gene ID\tReference Count\tWB Paper ID\tPubMed ID\n";
+#print OUT "WormBase Gene ID\tReference Count\tWB Paper ID\tPubMed ID\n";
+print OUT "WormBase Gene ID\tReference\n";
 
 $query="QUERY FIND Paper Type = Journal_article; follow Gene";
 my @geneList = $db->find($query);
 foreach $gene (@geneList) {
     $totalRef = 0;
     $geneRef = "";
+    $combRef = ""; #this is for combined reference of WBID/PMID
     my @geneRefList = $gene -> Reference; 
     foreach $ref (@geneRefList) {
 	next unless ($paperPrimary{$ref});
@@ -61,20 +63,23 @@ foreach $gene (@geneList) {
 	if ($PaperID{$ref}) {
 	  $pmid = $PaperID{$ref};
 	} else {
-	  $pmid = "N.A.";
+	  $pmid = " N.A.";
 	}
 	
         if ($geneRef ne "") {
-	   $geneRef = join ",", $geneRef, $ref;
-	   $genePubMedRef = join ",", $genePubMedRef, $pmid;	    
+	   $geneRef = join ", ", $geneRef, $ref;
+	   $genePubMedRef = join ", ", $genePubMedRef, $pmid;
+	   $combRef = join "", $combRef, ", ",  $ref, "(pmid", $pmid, ")";	    
 	} else {
 	    $geneRef = $ref;	   
 	    $genePubMedRef = $pmid;
+	    $combRef = join "", $ref, "(pmid", $pmid, ")"; 
 	}
-        $totalRef++;
+        $totalRef++;	
 	
     }    
-    print OUT "$gene\t$totalRef\t$geneRef\t$genePubMedRef\n";
+    #print OUT "$gene\t$totalRef\t$geneRef\t$genePubMedRef\n";
+    print OUT "$gene\t$combRef\n";
 }
 
 
