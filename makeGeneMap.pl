@@ -27,12 +27,13 @@ while ($line = <IN>) {
 	@tmp = split '"', $line;
 	$g = $tmp[1];
     } elsif ($line =~ /^Map/) {
+	next unless ($line =~ /"/);
 	@tmp = split '"', $line;
 	$chr = $tmp[1];
 
 	if ($line =~ /Position/) {
 	    @pos = split /\s+/, $line;
-	    $p = @pos[3];
+	    $p = $pos[3];
 	} else {
 	    $p = "";
 	}
@@ -42,7 +43,16 @@ while ($line = <IN>) {
 	} else {
 	    print OUT "$g\t$chr $p\n";
 	}
-    }   
+    } elsif ($line =~ /^Interpolated_map_position/) {
+	@tmp = split '"', $line;
+	$chr = $tmp[1];
+
+	@tmp = ();
+	@tmp = split /\s+/, $line;
+	
+	$p = $tmp[2];
+	print OUT "$g\t$chr $p\n";	
+    }
 }    
 
 close (IN);
