@@ -22,7 +22,7 @@ QUERY FIND Variation Variation_type = *allele; Sequenced
 show -a -f ace_files/SequencedAllele.ace
 QUERY FIND Interaction predicted
 show -a -t Interactor_overlapping_gene -f ace_files/WSInt.ace
-QUERY FIND Gene Map = *
-show -a -t Map -f ace_files/WBGeneMap.ace
+QUERY FIND Gene Map_info = *
+show -a -t Map_info -f ace_files/WBGeneMap.ace
 quit
 END_TACE
