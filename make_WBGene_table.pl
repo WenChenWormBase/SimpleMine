@@ -4,11 +4,12 @@
 print "This program create Gene Name table.\n";
 print "Input file: /home/wen/simpleMine/ace_files/WBGeneIdentity.ace\n";
 print "Input file: /home/wen/simpleMine/ace_files/WBGeneTranscript.ace\n";
+print "Input file: /home/wen/simpleMine/ace_files/WBGeneOperon.ace\n";
 print "Output file: WBGeneName.csv\n\n";
 
 print "Parse Gene names ...";
 
-my ($line, $g, $cds, $pub_name, $merged_into, $status, $seq_name, $wormpep, $uniprot, $treefam, $refSeqRNA, $refSeqProtein, $other_name, $mol_name);
+my ($line, $g, $cds, $pub_name, $merged_into, $status, $seq_name, $wormpep, $uniprot, $uniprotRef, $treefam, $refSeqRNA, $refSeqProtein, $other_name, $mol_name, $ope);
 my @ceGenes;
 my $ceID = 0;
 my @tmp;
@@ -16,6 +17,9 @@ my %otherName;
 my %pubName;
 #my %cdsGene;
 my %geneCDS;
+my %geneOPE;
+my %geneUniprot;
+my $geneUniPair;
 my @otherNameList;
 my ($w0, $w1); #for wormpep
 
@@ -42,6 +46,27 @@ close (CDS);
 #--------------------------- done getting transcript names -------------------------------
 
 
+#------------- Get operon names ---------------------------------
+
+open (OPE, "/home/wen/simpleMine/ace_files/WBGeneOperon.ace") || die "can't open
+ WBGeneOperon.ace!";
+while ($line=<OPE>) {
+    if ($line =~ /^Gene/) {
+	@tmp = split '"', $line;
+	$g = $tmp[1];
+    } elsif ($line =~ /^Contained_in_operon/) {
+	@tmp = split '"', $line;
+	$ope = $tmp[1];
+	if ($geneOPE{$g}){
+	    $geneOPE{$g} = join ", ", $geneOPE{$g}, $ope;
+	} else {
+	    $geneOPE{$g} = $ope;
+        }
+    }
+}
+close (OPE);
+#--------------------------- done getting operon names -------------
+
 #---------------- Get Public names ------------------------------------
 open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't open WBGeneIdentity.ace!";
 while ($line =<IN>) {
@@ -63,7 +88,7 @@ open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't ope
 open (OUT, ">WBGeneName.csv") || die "cannot open WBGeneName.csv!\n";
 open (CEG, ">AllCelegansGenes.txt") || die "cannot open AllCelegansGenes.txt!\n";
 
-print OUT "WormBase Gene ID\tPublic Name\tWormBase Status\tSequence Name\tOther Name\tTranscript\tWormPep\tUniprot\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
+print OUT "WormBase Gene ID\tPublic Name\tWormBase Status\tSequence Name\tOther Name\tTranscript\tOperon\tWormPep\tUniprot\tReference Uniprot ID\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
 
 $id = 0;
 $id_a = 0;
@@ -144,18 +169,30 @@ while ($line =<IN>) {
 		$other_name = join ", ",  $other_name, $tmp[1];
 	    }
 	}
-    }  elsif ($line =~ /UniProt/) {
+    }  elsif ($line =~ /UniProtAcc/) {
+
 	@tmp = split '"', $line;
-
-	$id_a++;
-	#print ALIAS "$id_a\t$tmp[5]\t$g\n";
-
-	if ($uniprot eq "N.A.") {
-	    $uniprot = $tmp[5];
-	} else {
-	    $uniprot = join ", ",  $uniprot, $tmp[5];
+	
+	if ($line =~ /UniProt_GCRP/) {
+	    $uniprotRef = $tmp[5];
 	}
+	
+	next unless (($line =~ /TrEMBL/)||($line =~ /SwissProt/));
+	$geneUniPair = join "", $g, $tmp[5];
 
+	if ($geneUniprot{$geneUniPair}) {
+	    #do nothing
+	} else {
+	    $id_a++;
+	    #print ALIAS "$id_a\t$tmp[5]\t$g\n";
+
+	    if ($uniprot eq "N.A.") {
+		$uniprot = $tmp[5];
+	    } else {
+		$uniprot = join ", ",  $uniprot, $tmp[5];
+	    }
+	    $geneUniprot{$geneUniPair} = 1;
+	}
     }  elsif ($line =~ /TREEFAM/) {
 	@tmp = split '"', $line;
 
@@ -192,7 +229,13 @@ while ($line =<IN>) {
 	    $cds = "N.A.";
 	}
 
-	print OUT "$g\t$pub_name\t$status\t$seq_name\t$other_name\t$cds\t$wormpep\t$uniprot\t$treefam\t$refSeqRNA\t$refSeqProtein\n";
+	if ($geneOPE{$g}) {
+	    $ope = $geneOPE{$g};
+	} else {
+	    $ope = "N.A.";
+	}
+	
+	print OUT "$g\t$pub_name\t$status\t$seq_name\t$other_name\t$cds\t$ope\t$wormpep\t$uniprot\t$uniprotRef\t$treefam\t$refSeqRNA\t$refSeqProtein\n";
     }
 }
 
