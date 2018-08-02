@@ -18,6 +18,7 @@ QUERY FIND Gene WBGene*
 show -a -t Identity -f ace_files/WBGeneIdentity.ace
 show -a -t Species -f ace_files/WBGeneSpe.ace
 show -a -t Molecular_info -f ace_files/WBGeneTranscript.ace
+show -a -t Contained_in_operon -f ace_files/WBGeneOperon.ace
 QUERY FIND Variation Variation_type = *allele; Sequenced
 show -a -f ace_files/SequencedAllele.ace
 QUERY FIND Interaction predicted
