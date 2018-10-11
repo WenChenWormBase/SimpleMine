@@ -27,5 +27,8 @@ Create a table for all sequenced alleles except those mapped to introns or are s
 9. makeGeneMap.pl
 Create a table showing chromosome and chromosomal position
 
-10. buildSimpleMine.sh
+10. makeGeneDescription.pl
+Create a table for Concise Description, Automatic Description and Expression Cluster Summary.
+
+11. buildSimpleMine.sh
 A shell script that operate all above perl scripts
