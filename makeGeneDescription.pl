@@ -14,7 +14,7 @@ my $i = 0;
 my $totalGenes;
 
 #------- Get Expression Cluster Summary ---------------------------------
-open (EC, "/home/wen/AutoDescription/ecSummary/allECreg.csv") || die "can't open allECreg.csv!";
+open (EC, "/home/wen/simpleMine/ace_files/allECreg.csv") || die "can't open allECreg.csv!";
 my %ecSum;
 while ($line = <EC>) {
     next unless ($line =~ /^WBGene/);
