@@ -10,6 +10,7 @@ mkdir obsolete/
 /home/wen/simpleMine/bin/makeConfirmedInteraction.pl
 /home/wen/simpleMine/bin/makeGeneAlleleTable.pl
 /home/wen/simpleMine/bin/makeGeneMap.pl
+/home/wen/simpleMine/bin/makeGeneDescription.pl
 
 mv RNAiAllelePheno.csv obsolete/.
 cp WBGeneName.csv 1_WBGeneName.csv
@@ -20,4 +21,4 @@ mv ConfirmedInteraction.csv 5_ConfirmedInteraction.csv
 mv GeneTissueLifeStage.csv 6_GeneTissueLifeStage.csv
 mv GeneDiseaseHumanOrtholog.csv 7_GeneDiseaseHumanOrtholog.csv
 mv GeneReference.csv 8_GeneReference.csv
-
+mv GeneDescription.csv 9_GeneDescription.csv
