@@ -8,6 +8,7 @@ gunzip /home/wen/simpleMine/ace_files/ce_orthologs.txt.gz
 cp /home/citace/WS/species/c_elegans/PRJNA13758/annotation/c_elegans.PRJNA13758.WS*.interactions.txt.gz /home/wen/simpleMine/ace_files/ce_interaction.txt.gz
 gunzip /home/wen/simpleMine/ace_files/ce_interaction.txt.gz
 cp /home/citace/WS/ONTOLOGY/disease_association.WS*.wb /home/wen/simpleMine/ace_files/disease_association.wb
+cat /home/wen/AutoDescription/ecSummary/*.csv > /home/wen/simpleMine/ace_files/allECreg.csv
 
 #-------------prepare ace files for PCL file generation---------------------
 cd /home/wen/simpleMine/
