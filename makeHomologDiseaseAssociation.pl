@@ -11,19 +11,52 @@ my $tace='/usr/local/bin/tace';
 print "connecting to database... ";
 my $db = Ace->connect(-path => $acedbpath,  -program => $tace) || die print "Connection failure: ", Ace->error;
 
-#------------Build disease term and id hash-------
+#------------Build disease term and gene hash -------
 
 my %DO;  
-my ($doTerm, $doName);
+my ($doTerm, $doName, $g, $gEntry, $diseaseInformation);
+my %geneDiseaseInfo;
+my @geneBio;
+my @geneSeq;
+my $totalDiseaseGene = 0;
+my @tmp;
 
 my $query="QUERY FIND DO_term";
 my @doTermList = $db->find($query);
 foreach $doTerm (@doTermList) {
+    @geneBio = ();
+    @geneSeq = ();
      $doName = $doTerm->Name;
      $DO{$doTerm} = $doName;
      #print "$doTerm - $doName\n";
+     if ($doTerm->Gene_by_biology) {
+	 @geneBio = $doTerm->Gene_by_biology;
+	 foreach $g (@geneBio) {
+	     $gEntry = join " \| ", $doName, $doTerm, "By Experiment";
+	     
+	     if ($geneDiseaseInfo{$g}) {
+		 $geneDiseaseInfo{$g} = join ",", $geneDiseaseInfo{$g}, $gEntry;
+	     } else {
+		 $geneDiseaseInfo{$g} = $gEntry;
+		 $totalDiseaseGene++;
+	     }
+	 }
+     } elsif  ($doTerm->Gene_by_orthology) {
+	 @geneBio = $doTerm->Gene_by_orthology;
+	 foreach $g (@geneBio) {
+	     $gEntry = join " \| ", $doName, $doTerm, "By Orthology";
+	     
+	     if ($geneDiseaseInfo{$g}) {
+		 $geneDiseaseInfo{$g} = join ",", $geneDiseaseInfo{$g}, $gEntry;
+	     } else {
+		 $geneDiseaseInfo{$g} = $gEntry;
+		 $totalDiseaseGene++;
+	     }
+	 }
+     }      
 }
 print scalar @doTermList, " disease ontology term found in WS.\n";
+print "$totalDiseaseGene genes have disease information.\n";
 
 #--------------Done ---------------------------------------------------
 
@@ -72,44 +105,44 @@ print "$totalOrtho C.elegans genes have human orthologs\n";
 
 #--------------- Get Worm Disease info ---------------
 #open (DAF, "disease_association.WS259.txt")  || die "cannot open disease_association.WSXXX.txt!\n";
-open (DAF, "/home/wen/simpleMine/ace_files/disease_association.wb")  || die "cannot open disease_association.WSXXX.txt!\n";
-my @tmp;
-my %diseaseInfo;
-my ($omim, $doEntry, $diseaseInformation);
-my $totalDiseaseGene = 0;
+#open (DAF, "/home/wen/simpleMine/ace_files/disease_association.wb")  || die "cannot open disease_association.WSXXX.txt!\n";
+#my @tmp;
+#my %diseaseInfo;
+#my ($omim, $doEntry, $diseaseInformation);
+#my $totalDiseaseGene = 0;
 
-while ($line=<DAF>) {
-    chomp($line);
-    next unless $line =~ /^WB/;
-    @tmp = split /\s+/, $line;
-    $geneid = $tmp[1];
-    $gName = $tmp[2];
-    $doTerm = $tmp[3];
-    if ($tmp[5] eq "IEA") {
-	$evidence = "Based on Sequence";
-    } elsif ($tmp[5] eq "IMP") {
-	$evidence = "Based on Experiment";
-    } else {
-	$evidence = "ERROR-No-DiseaseEvidence";
-    }
-    $omim = $tmp[6];
-    if ($DO{$doTerm}) {
-	$doName = $DO{$doTerm};
-    } else {
-	$doName = "N.A.";
-    }
-    
-    $doEntry = join " \| ", $doName, $evidence, $doTerm, $omim;
-    if ($diseaseInfo{$geneid}) {
-	$diseaseInfo{$geneid} = join ", ", $diseaseInfo{$geneid}, $doEntry;
-    } else {
-	$diseaseInfo{$geneid} = $doEntry;
-	$totalDiseaseGene++;
-    } 
-}
+#while ($line=<DAF>) {
+#    chomp($line);
+#    next unless $line =~ /^WB/;
+#    @tmp = split /\s+/, $line;
+#    $geneid = $tmp[1];
+#    $gName = $tmp[2];
+#    $doTerm = $tmp[3];
+#    if ($tmp[5] eq "IEA") {
+#	$evidence = "Based on Sequence";
+#    } elsif ($tmp[5] eq "IMP") {
+#	$evidence = "Based on Experiment";
+#    } else {
+#	$evidence = "ERROR-No-DiseaseEvidence";
+#    }
+#    $omim = $tmp[6];
+#    if ($DO{$doTerm}) {
+#	$doName = $DO{$doTerm};
+#    } else {
+#	$doName = "N.A.";
+#    }
+#    
+#    $doEntry = join " \| ", $doName, $evidence, $doTerm, $omim;
+#    if ($diseaseInfo{$geneid}) {
+#	$diseaseInfo{$geneid} = join ", ", $diseaseInfo{$geneid}, $doEntry;
+#    } else {
+#	$diseaseInfo{$geneid} = $doEntry;
+#	$totalDiseaseGene++;
+#    } 
+#}
 
-close (DAF);
-print "$totalDiseaseGene C.elegans genes have disease association.\n";
+#close (DAF);
+#print "$totalDiseaseGene C.elegans genes have disease association.\n";
 
 #-----------------Build Gene-Disease-HumanOrtholog table--------------
 open (NAME, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace")  || die "cannot open /home/wen/simpleMine/ace_files/WBGeneIdentity.ace!\n";
@@ -139,8 +172,8 @@ while ($line = <NAME>) {
 		   $humanOrtho = "N.A.";
 	       }
 
-	       if ($diseaseInfo{$geneid}) {
-		   $diseaseInformation = $diseaseInfo{$geneid};
+	       if ($geneDiseaseInfo{$geneid}) {
+		   $diseaseInformation = $geneDiseaseInfo{$geneid};
 	       } else {
 		   $diseaseInformation = "N.A.";
 	       }
