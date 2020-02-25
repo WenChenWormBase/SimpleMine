@@ -5,6 +5,7 @@ print "This program create Gene Name table.\n";
 print "Input file: /home/wen/simpleMine/ace_files/WBGeneIdentity.ace\n";
 print "Input file: /home/wen/simpleMine/ace_files/WBGeneTranscript.ace\n";
 print "Input file: /home/wen/simpleMine/ace_files/WBGeneOperon.ace\n";
+print "Input file: /home/wen/simpleMine/ace_files/WormPepLive.ace\n";
 print "Output file: WBGeneName.csv\n\n";
 
 print "Parse Gene names ...";
@@ -17,12 +18,13 @@ my %otherName;
 my %pubName;
 #my %cdsGene;
 my %geneCDS;
+my %wpExist;
+my %wpCDS;
 my %geneOPE;
 my %geneUniprot;
 my $geneUniPair;
 my @otherNameList;
 my ($w0, $w1); #for wormpep
-
 
 #------------- Get transcript names ---------------------------------------------
 
@@ -46,8 +48,30 @@ close (CDS);
 #--------------------------- done getting transcript names -------------------------------
 
 
-#------------- Get operon names ---------------------------------
+#------------- Get WormPep names ---------------------------------------------
+open (PEP, "/home/wen/simpleMine/ace_files/WormPepLive.ace") || die "can't open WormPepLive.ace!";
+while ($line=<PEP>) {
+    if ($line =~ /^Protein/) {
+	@tmp = split '"', $line;
+	$wormpep = $tmp[1];
+    } elsif ($line =~ /^Corresponding_CDS/) {
+	@tmp = split '"', $line;
+	$cds = $tmp[1];
+	#$cdsGene{$cds} = $g; 
+	if ($wpCDS{$wormpep}){
+	    $wpCDS{$wormpep} = join ", ", $wpCDS{$wormpep}, $cds;
+	    $wpExist{$wormpep}++;
+	} else {
+	    $wpCDS{$wormpep} = $cds;
+	    $wpExist{$wormpep} = 1;
+        }
+    }
+}
+close (PEP);
+#--------------------------- done getting WormPep names -------------------------------
 
+
+#------------- Get operon names ---------------------------------
 open (OPE, "/home/wen/simpleMine/ace_files/WBGeneOperon.ace") || die "can't open
  WBGeneOperon.ace!";
 while ($line=<OPE>) {
@@ -105,6 +129,7 @@ while ($line =<IN>) {
 	$seq_name = "N.A.";
 	$wormpep  = "N.A.";
 	$uniprot = "N.A.";
+	$uniprotRef = "N.A.";
 	$treefam = "N.A.";
 	$refSeqRNA = "N.A.";
 	$refSeqProtein = "N.A.";
@@ -142,15 +167,9 @@ while ($line =<IN>) {
 	@tmp = split '"', $line;
 	$mol_name = $tmp[1];
 
-	if ($mol_name =~ /^WP/) {
-	    ($w0, $w1) = split ":", $mol_name;
-		
-	    if ($wormpep eq "N.A.") {
-		$wormpep = $w1;
-	    } else {
-		$wormpep = join ", ",  $wormpep, $w1;
-	    }
-
+	#get WormPep names		
+	if ($wpExist{$mol_name}) {
+	   $wormpep = $mol_name;
 	}
 
 	$id_a++;
