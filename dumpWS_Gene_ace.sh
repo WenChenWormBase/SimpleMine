@@ -22,7 +22,7 @@ show -a -t Structured_description -f ace_files/WBGeneDescription.ace
 show -a -t Molecular_info -f ace_files/WBGeneTranscript.ace
 show -a -t Contained_in_operon -f ace_files/WBGeneOperon.ace
 QUERY FIND Protein; WormPep AND Live 
-show -a -t Corresponding_CDS -f ace_files/WormPepLive.ace
+show -a -t Motif_homol -f ace_files/WormPepLive.ace
 QUERY FIND Variation Variation_type = *allele; Sequenced
 show -a -f ace_files/SequencedAllele.ace
 QUERY FIND Interaction Predicted AND Log_likelihood_score > 1.5 
