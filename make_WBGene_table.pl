@@ -10,7 +10,7 @@ print "Output file: WBGeneName.csv\n\n";
 
 print "Parse Gene names ...";
 
-my ($line, $g, $cds, $pub_name, $merged_into, $status, $seq_name, $wormpep, $uniprot, $uniprotRef, $treefam, $refSeqRNA, $refSeqProtein, $other_name, $mol_name, $ope);
+my ($line, $g, $cds, $pub_name, $merged_into, $status, $seq_name, $wormpep, $uniprot, $uniprotRef, $treefam, $refSeqRNA, $refSeqProtein, $other_name, $mol_name, $ope, $motif);
 my @ceGenes;
 my $ceID = 0;
 my @tmp;
@@ -19,7 +19,7 @@ my %pubName;
 #my %cdsGene;
 my %geneCDS;
 my %wpExist;
-my %wpCDS;
+my %wpMotif;
 my %geneOPE;
 my %geneUniprot;
 my $geneUniPair;
@@ -54,15 +54,14 @@ while ($line=<PEP>) {
     if ($line =~ /^Protein/) {
 	@tmp = split '"', $line;
 	$wormpep = $tmp[1];
-    } elsif ($line =~ /^Corresponding_CDS/) {
+    } elsif ($line =~ /^Motif_homol/) {
 	@tmp = split '"', $line;
-	$cds = $tmp[1];
-	#$cdsGene{$cds} = $g; 
-	if ($wpCDS{$wormpep}){
-	    $wpCDS{$wormpep} = join ", ", $wpCDS{$wormpep}, $cds;
+	$motif = $tmp[1];
+	if ($wpMotif{$wormpep}){
+	    $wpMotif{$wormpep} = join ", ", $wpMotif{$wormpep}, $motif;
 	    $wpExist{$wormpep}++;
 	} else {
-	    $wpCDS{$wormpep} = $cds;
+	    $wpMotif{$wormpep} = $motif;
 	    $wpExist{$wormpep} = 1;
         }
     }
@@ -112,7 +111,7 @@ open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't ope
 open (OUT, ">WBGeneName.csv") || die "cannot open WBGeneName.csv!\n";
 open (CEG, ">AllCelegansGenes.txt") || die "cannot open AllCelegansGenes.txt!\n";
 
-print OUT "WormBase Gene ID\tPublic Name\tWormBase Status\tSequence Name\tOther Name\tTranscript\tOperon\tWormPep\tUniprot\tReference Uniprot ID\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
+print OUT "WormBase Gene ID\tPublic Name\tWormBase Status\tSequence Name\tOther Name\tTranscript\tOperon\tWormPep\tProtein Domain\tUniprot\tReference Uniprot ID\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
 
 $id = 0;
 $id_a = 0;
@@ -128,6 +127,9 @@ while ($line =<IN>) {
 	$pub_name = "N.A.";
 	$seq_name = "N.A.";
 	$wormpep  = "N.A.";
+	$allWormpep = "N.A.";
+	$motif = "N.A.";
+	$allMotif = "N.A.";
 	$uniprot = "N.A.";
 	$uniprotRef = "N.A.";
 	$treefam = "N.A.";
@@ -169,7 +171,17 @@ while ($line =<IN>) {
 
 	#get WormPep names		
 	if ($wpExist{$mol_name}) {
-	   $wormpep = $mol_name;
+	    $wormpep = $mol_name; 
+	    if ($wpMotif{$mol_name}) {
+	      $motif = join " - ", $wormpep, $wpMotif{$mol_name};
+	    }	    
+	    if ($allWormpep eq "N.A.") { #first protein product
+		$allWormpep = $wormpep;
+		$allMotif = $motif;
+	    } else { #this gene has multiple protein product
+		$allWormpep = join " \| ", $allWormpep, $wormpep;
+		$allMotif = join " \| ", $allMotif, $motif;
+	    }
 	}
 
 	$id_a++;
@@ -254,7 +266,7 @@ while ($line =<IN>) {
 	    $ope = "N.A.";
 	}
 	
-	print OUT "$g\t$pub_name\t$status\t$seq_name\t$other_name\t$cds\t$ope\t$wormpep\t$uniprot\t$uniprotRef\t$treefam\t$refSeqRNA\t$refSeqProtein\n";
+	print OUT "$g\t$pub_name\t$status\t$seq_name\t$other_name\t$cds\t$ope\t$allWormpep\t$allMotif\t$uniprot\t$uniprotRef\t$treefam\t$refSeqRNA\t$refSeqProtein\n";
     }
 }
 
