@@ -155,6 +155,7 @@ foreach $genePair (@intList) {
 	} else {
 	    $geneList[$j] = $g;
 	    $j++;
+	    $existGene{$g} = 1;
 	}	
     }
 
@@ -173,21 +174,25 @@ foreach $genePair (@intList) {
 	if ($evi eq "") {
 	    $evi = "Genetic";
 	} else {
-	    $evi = join " | ", $evi, "Genetic";
+	    #$evi = join " | ", $evi, "Genetic";
+	    $evi = join ";", $evi, "Genetic";
 	}
     }    
     if ($Reg{$genePair}) {
 	if ($evi eq "") {
 	    $evi = "Regulatory";
 	} else {
-	    $evi = join " | ", $evi, "Regulatory";
+	    #$evi = join " | ", $evi, "Regulatory";
+	    $evi = join ";", $evi, "Regulatory";
 	}
     }
     #done getting interaction types for each pair
 
-    $des1 = join "", $publicName{$g2}, "(", $evi, ")";;
-    $des2 = join "", $publicName{$g1}, "(", $evi, ")";;
-    
+    #$des1 = join "", $publicName{$g2}, "(", $evi, ")";;
+    #$des2 = join "", $publicName{$g1}, "(", $evi, ")";;
+    $des1 = join "\|", $publicName{$g2}, $evi;
+    $des2 = join "\|", $publicName{$g1}, $evi;
+   
     if ($geneInt{$g1}) {
 	$geneInt{$g1} = join ", ", $geneInt{$g1}, $des1;
     } else {
@@ -204,12 +209,44 @@ foreach $genePair (@intList) {
 print "$j genes found having confirmed interactions.\n";
 
 
+my @Int3;
+my @Int2;
+my @Int1;
+my ($allInt, $oneInt, $numEvi, $i1, $i2, $i3);
+my @eviList;
+
 open (OUT, ">ConfirmedInteraction.csv") || die "cannot open $!\n";
 #print OUT "WormBase Gene ID\tConfirmed Interaction\n";
 print OUT "WormBase Gene ID\tInteracting Gene\n";
 foreach $g (@geneList) {
-    if ($geneInt{$g}) {	
-	print OUT "$g\t$geneInt{$g}\n";
+    if ($geneInt{$g}) {
+	@tmp = ();
+	@Int3 = ();
+	@Int2 = ();
+	@Int1 = ();
+	$i1 = 0;
+	$i2 = 0;
+	$i3 =0;
+	
+	@tmp = split ", ", $geneInt{$g};
+	foreach $oneInt (@tmp) {
+	    @eviList = ();
+	    @eviList = split ";", $oneInt;
+	    $numEvi = @eviList;
+	    if ($numEvi == 1) {
+		$Int1[$i1] = $oneInt;
+		$i1++;
+	    } elsif  ($numEvi == 2) {
+		$Int2[$i2] = $oneInt;
+		$i2++;
+	    } elsif  ($numEvi == 3) {
+		$Int3[$i3] = $oneInt;
+		$i3++;
+	    }
+	    $allInt = join ", ", @Int3, @Int2, @Int1;
+	}
+	#print OUT "$g\t$geneInt{$g}\n";
+	print OUT "$g\t$allInt\n";
     } else {
 	print "ERROR: $g has no interaction!\n"
     }
