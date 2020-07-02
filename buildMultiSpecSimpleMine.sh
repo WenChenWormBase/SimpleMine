@@ -1,0 +1,11 @@
+mkdir multiSpeSimpleMine
+mkdir multiSpeSimpleMine/b_malayi
+mkdir multiSpeSimpleMine/c_briggsae
+mkdir multiSpeSimpleMine/c_brenneri
+mkdir multiSpeSimpleMine/c_elegans
+mkdir multiSpeSimpleMine/c_japonica
+mkdir multiSpeSimpleMine/c_remanei
+mkdir multiSpeSimpleMine/p_pacificus
+mkdir multiSpeSimpleMine/o_volvulus
+mkdir multiSpeSimpleMine/s_ratti
+mkdir multiSpeSimpleMine/mix
