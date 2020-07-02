@@ -32,10 +32,11 @@ foreach $doTerm (@doTermList) {
      if ($doTerm->Gene_by_biology) {
 	 @geneBio = $doTerm->Gene_by_biology;
 	 foreach $g (@geneBio) {
-	     $gEntry = join " \| ", $doName, $doTerm, "By Experiment";
+	     #$gEntry = join " \| ", $doName, $doTerm, "By Experiment";
+	     $gEntry = join "\|", $doName, "By Experiment";
 	     
 	     if ($geneDiseaseInfo{$g}) {
-		 $geneDiseaseInfo{$g} = join ",", $geneDiseaseInfo{$g}, $gEntry;
+		 $geneDiseaseInfo{$g} = join ", ", $geneDiseaseInfo{$g}, $gEntry;
 	     } else {
 		 $geneDiseaseInfo{$g} = $gEntry;
 		 $totalDiseaseGene++;
@@ -44,10 +45,10 @@ foreach $doTerm (@doTermList) {
      } elsif  ($doTerm->Gene_by_orthology) {
 	 @geneBio = $doTerm->Gene_by_orthology;
 	 foreach $g (@geneBio) {
-	     $gEntry = join " \| ", $doName, $doTerm, "By Orthology";
-	     
+	     #$gEntry = join " \| ", $doName, $doTerm, "By Orthology";
+	     $gEntry = join "\|", $doName, "By Orthology";
 	     if ($geneDiseaseInfo{$g}) {
-		 $geneDiseaseInfo{$g} = join ",", $geneDiseaseInfo{$g}, $gEntry;
+		 $geneDiseaseInfo{$g} = join ", ", $geneDiseaseInfo{$g}, $gEntry;
 	     } else {
 		 $geneDiseaseInfo{$g} = $gEntry;
 		 $totalDiseaseGene++;
@@ -92,10 +93,10 @@ while ($line=<ORTHO>) {
 	($spe, $humanid, $humanName, $evidence) = split /\t/, $line;
 	
 	if ($humanOrtho eq "") {
-	    $humanOrtho = join " \| ", $humanid, $evidence;
+	    $humanOrtho = join "\|", $humanid, $evidence;
 	    
 	} else {
-	    $humanOrthoSingle = join " \| ", $humanid, $evidence;
+	    $humanOrthoSingle = join "\|", $humanid, $evidence;
 	    $humanOrtho = join ", ", $humanOrtho, $humanOrthoSingle;
 	}
     }
