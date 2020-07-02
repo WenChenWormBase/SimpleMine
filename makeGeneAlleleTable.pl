@@ -97,7 +97,8 @@ print "A total of $i genes have sequenced allele information.\n";
 
 
 open (OUT, ">GeneAllele.csv") || die "cannot open $!\n";
-print OUT "WormBase Gene ID\tSequenced Allele\n";
+#print OUT "WormBase Gene ID\tSequenced Allele\n";
+print OUT "WormBase Gene ID\tCoding_exon Non_silent Allele\n";
 
 my @aList; # a list of alleles for each gene
 my $p = 0; #record if the allele is already printed
@@ -138,14 +139,16 @@ foreach $g (@geneWithAllele) {
 
     foreach $a (@aList) {
 	next unless ($aName{$a});
-	next unless ($aExon{$a} ne "Intron");
+	#next unless ($aExon{$a} ne "Intron");
+	next unless ($aExon{$a} eq "Coding_exon");
 	next unless ($aMolChange{$a} ne "Silent");
 	#next unless ($aType{$a} ne "Tandem_duplication");
 	$alleleName = $aName{$a};
 	if ($p == 1) {
 	    print OUT ", ";
         }	
-	print OUT "$alleleName\|$aType{$a}\|$aMolChange{$a}\|$aExon{$a}";
+	#print OUT "$alleleName\|$aType{$a}\|$aMolChange{$a}\|$aExon{$a}";
+	print OUT "$alleleName\|$aType{$a}\|$aMolChange{$a}";
 	$p = 1;
     }
     print OUT "\n";
