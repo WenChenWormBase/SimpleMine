@@ -7,6 +7,8 @@ cp /home/citace/WS/species/c_elegans/PRJNA13758/annotation/c_elegans.PRJNA13758.
 gunzip /home/wen/simpleMine/ace_files/ce_orthologs.txt.gz
 cp /home/citace/WS/species/c_elegans/PRJNA13758/annotation/c_elegans.PRJNA13758.WS*.interactions.txt.gz /home/wen/simpleMine/ace_files/ce_interaction.txt.gz
 gunzip /home/wen/simpleMine/ace_files/ce_interaction.txt.gz
+cp /home/citace/WS/ONTOLOGY/gene_association.WS*.wb /home/wen/simpleMine/ace_files/gene_association.wb
+cp /home/citace/WS/ONTOLOGY/gene_ontology.WS*.obo /home/wen/simpleMine/ace_files/gene_ontology.obo
 #cp /home/citace/WS/ONTOLOGY/disease_association.WS*.wb /home/wen/simpleMine/ace_files/disease_association.wb
 cat /home/wen/AutoDescription/ecSummary/*.csv > /home/wen/simpleMine/ace_files/allECreg.csv
 
