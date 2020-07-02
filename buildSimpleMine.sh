@@ -4,6 +4,7 @@ mkdir obsolete/
 /home/wen/simpleMine/bin/dumpWS_Gene_ace.sh
 /home/wen/simpleMine/bin/make_WBGene_table.pl
 /home/wen/simpleMine/bin/getGeneReference.pl
+/home/wen/simpleMine/bin/getGoTerm.pl
 /home/wen/simpleMine/bin/makeRNAiAllelePheno.pl
 /home/wen/simpleMine/bin/makeGeneTissueLifeStage.pl
 /home/wen/simpleMine/bin/makeHomologDiseaseAssociation.pl
@@ -21,4 +22,5 @@ mv ConfirmedInteraction.csv 5_ConfirmedInteraction.csv
 mv GeneTissueLifeStage.csv 6_GeneTissueLifeStage.csv
 mv GeneDiseaseHumanOrtholog.csv 7_GeneDiseaseHumanOrtholog.csv
 mv GeneReference.csv 8_GeneReference.csv
-mv GeneDescription.csv 9_GeneDescription.csv
+mv GeneOntologyAssociation.csv 9_GeneOntologyAssociation.csv
+mv GeneDescription.csv 10_GeneDescription.csv
