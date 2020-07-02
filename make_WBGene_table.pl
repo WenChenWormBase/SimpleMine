@@ -6,11 +6,13 @@ print "Input file: /home/wen/simpleMine/ace_files/WBGeneIdentity.ace\n";
 print "Input file: /home/wen/simpleMine/ace_files/WBGeneTranscript.ace\n";
 print "Input file: /home/wen/simpleMine/ace_files/WBGeneOperon.ace\n";
 print "Input file: /home/wen/simpleMine/ace_files/WormPepLive.ace\n";
+print "Input file: /home/wen/simpleMine/ace_files/WBGeneSpe.ace\n";
 print "Output file: WBGeneName.csv\n\n";
 
 print "Parse Gene names ...";
 
-my ($line, $g, $cds, $pub_name, $merged_into, $status, $seq_name, $wormpep, $uniprot, $uniprotRef, $treefam, $refSeqRNA, $refSeqProtein, $other_name, $mol_name, $ope, $motif);
+my ($line, $g, $spe, $cds, $pub_name, $seq_name, $wormpep, $uniprot, $uniprotRef, $treefam, $refSeqRNA, $refSeqProtein, $other_name, $mol_name, $ope, $motif);
+#my ($status, $merged_into);
 my @ceGenes;
 my $ceID = 0;
 my @tmp;
@@ -18,18 +20,40 @@ my %otherName;
 my %pubName;
 #my %cdsGene;
 my %geneCDS;
+my %geneSpe;
 my %wpExist;
 my %wpMotif;
 my %geneOPE;
 my %geneUniprot;
 my $geneUniPair;
 my @otherNameList;
-my ($w0, $w1); #for wormpep
+my ($w0, $w1, $checkstring); #for wormpep
+my %existPepMotif;
+
+#------ Get Species information -------------------------
+open (SPE, "/home/wen/simpleMine/ace_files/WBGeneSpe.ace") || die "can't open WBGeneSpe.ace!";
+while ($line=<SPE>) {
+    @tmp = ();
+    if ($line =~ /^Gene/) {
+	@tmp = split '"', $line;
+	$g = $tmp[1];
+    } elsif ($line =~ /^Species/) {
+	@tmp = split '"', $line;
+	$spe = $tmp[1];
+	$geneSpe{$g} = $spe;
+    }
+}
+close (SPE);
+
+#---- Done getting Species information -------------------
+
+
 
 #------------- Get transcript names ---------------------------------------------
 
 open (CDS, "/home/wen/simpleMine/ace_files/WBGeneTranscript.ace") || die "can't open WBGeneTranscript.ace!";
 while ($line=<CDS>) {
+    @tmp = ();  
     if ($line =~ /^Gene/) {
 	@tmp = split '"', $line;
 	$g = $tmp[1];
@@ -51,18 +75,23 @@ close (CDS);
 #------------- Get WormPep names ---------------------------------------------
 open (PEP, "/home/wen/simpleMine/ace_files/WormPepLive.ace") || die "can't open WormPepLive.ace!";
 while ($line=<PEP>) {
+    @tmp = ();      
     if ($line =~ /^Protein/) {
 	@tmp = split '"', $line;
 	$wormpep = $tmp[1];
     } elsif ($line =~ /^Motif_homol/) {
 	@tmp = split '"', $line;
 	$motif = $tmp[1];
+	$checkstring = join "", $wormpep, $motif;
+	next unless !($existPepMotif{$checkstring});
 	if ($wpMotif{$wormpep}){
-	    $wpMotif{$wormpep} = join ", ", $wpMotif{$wormpep}, $motif;
+	    $wpMotif{$wormpep} = join "\|", $wpMotif{$wormpep}, $motif;
 	    $wpExist{$wormpep}++;
+	    $existPepMotif{$checkstring} = 1;
 	} else {
 	    $wpMotif{$wormpep} = $motif;
 	    $wpExist{$wormpep} = 1;
+	    $existPepMotif{$checkstring} = 1;
         }
     }
 }
@@ -74,6 +103,7 @@ close (PEP);
 open (OPE, "/home/wen/simpleMine/ace_files/WBGeneOperon.ace") || die "can't open
  WBGeneOperon.ace!";
 while ($line=<OPE>) {
+    @tmp = ();  
     if ($line =~ /^Gene/) {
 	@tmp = split '"', $line;
 	$g = $tmp[1];
@@ -94,6 +124,7 @@ close (OPE);
 open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't open WBGeneIdentity.ace!";
 while ($line =<IN>) {
     chomp($line);
+    @tmp = ();  
     if ($line =~ /^Gene/) {
 	@tmp = split '"', $line;
 	$g = $tmp[1];
@@ -111,7 +142,7 @@ open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't ope
 open (OUT, ">WBGeneName.csv") || die "cannot open WBGeneName.csv!\n";
 open (CEG, ">AllCelegansGenes.txt") || die "cannot open AllCelegansGenes.txt!\n";
 
-print OUT "WormBase Gene ID\tPublic Name\tWormBase Status\tSequence Name\tOther Name\tTranscript\tOperon\tWormPep\tProtein Domain\tUniprot\tReference Uniprot ID\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
+print OUT "WormBase Gene ID\tPublic Name\tSpecies\tSequence Name\tOther Name\tTranscript\tOperon\tWormPep\tProtein Domain\tUniprot\tReference Uniprot ID\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
 
 $id = 0;
 $id_a = 0;
@@ -121,6 +152,7 @@ $oth = 0;
 $line = <IN>;
 while ($line =<IN>) {
     chomp($line);
+     @tmp = ();  
     if ($line =~ /^Gene/) {
 	@tmp = split '"', $line;
 	$g = $tmp[1];
@@ -135,22 +167,23 @@ while ($line =<IN>) {
 	$treefam = "N.A.";
 	$refSeqRNA = "N.A.";
 	$refSeqProtein = "N.A.";
-	$status = "N.A.";
-	$merged_into = "N.A.";
+	#$status = "N.A.";
+	#$merged_into = "N.A.";
 	$other_name = "N.A.";
 
 	$id++;
 	print GENES "$id\t$g\n";
 	$idGene{$g} = $id;
-    } elsif ($line =~ /^Live/) {
-	$status = "Live";
-    } elsif ($line =~ /^Dead/) {	
-	if ($merged_into ne "N.A.") {
-	    $status = "Dead, merged into $merged_into";
-	} else {
-	    $status = "Dead";
-	}
 
+#    } elsif ($line =~ /^Live/) {
+#	$status = "Live";
+#    } elsif ($line =~ /^Dead/) {	
+#	if ($merged_into ne "N.A.") {
+#	    $status = "Dead, merged into $merged_into";
+#	} else {
+#	    $status = "Dead";
+#	}
+	
     } elsif ($line =~ /Caenorhabditis elegans/) {
 	$ceGenes[$ceID] = $g;
 	$ceID++;	
@@ -173,14 +206,14 @@ while ($line =<IN>) {
 	if ($wpExist{$mol_name}) {
 	    $wormpep = $mol_name; 
 	    if ($wpMotif{$mol_name}) {
-	      $motif = join " - ", $wormpep, $wpMotif{$mol_name};
+	      $motif = join "\|", $wormpep, $wpMotif{$mol_name};
 	    }	    
 	    if ($allWormpep eq "N.A.") { #first protein product
 		$allWormpep = $wormpep;
 		$allMotif = $motif;
 	    } else { #this gene has multiple protein product
-		$allWormpep = join " \| ", $allWormpep, $wormpep;
-		$allMotif = join " \| ", $allMotif, $motif;
+		$allWormpep = join ", ", $allWormpep, $wormpep;
+		$allMotif = join ", ", $allMotif, $motif;
 	    }
 	}
 
@@ -191,8 +224,11 @@ while ($line =<IN>) {
 	$pub_name = $tmp[1];
     } elsif ($line =~ /^Other_name/) {
 	@tmp = split '"', $line;
-	if ($publicName{$tm[1]}) {
+	if ($pubName{$tmp[1]}) {
 	    #do not take it since this name is a public name for another gene
+	    	if ($tmp[1] eq "mdh-1") {
+		    print "Found mdh-1 as Other_name for $g.\n";
+		}
 	} else {
 	    if ($other_name eq "N.A.") {
 		$other_name = $tmp[1];
@@ -265,8 +301,13 @@ while ($line =<IN>) {
 	} else {
 	    $ope = "N.A.";
 	}
-	
-	print OUT "$g\t$pub_name\t$status\t$seq_name\t$other_name\t$cds\t$ope\t$allWormpep\t$allMotif\t$uniprot\t$uniprotRef\t$treefam\t$refSeqRNA\t$refSeqProtein\n";
+
+	if ($geneSpe{$g}) {
+	    $spe = $geneSpe{$g};
+	} else {
+	    $spe = "N.A.";
+	}
+	print OUT "$g\t$pub_name\t$spe\t$seq_name\t$other_name\t$cds\t$ope\t$allWormpep\t$allMotif\t$uniprot\t$uniprotRef\t$treefam\t$refSeqRNA\t$refSeqProtein\n";
     }
 }
 
