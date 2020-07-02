@@ -69,11 +69,13 @@ foreach $gene (@geneList) {
         if ($geneRef ne "") {
 	   $geneRef = join ", ", $geneRef, $ref;
 	   $genePubMedRef = join ", ", $genePubMedRef, $pmid;
-	   $combRef = join "", $combRef, ", ",  $ref, "(pmid", $pmid, ")";	    
+	   #$combRef = join "", $combRef, ", ",  $ref, "(pmid", $pmid, ")";
+	   $combRef = join "", $combRef, ", ",  $ref, "\|pmid", $pmid;
 	} else {
 	    $geneRef = $ref;	   
 	    $genePubMedRef = $pmid;
-	    $combRef = join "", $ref, "(pmid", $pmid, ")"; 
+	    #$combRef = join "", $ref, "(pmid", $pmid, ")"; 
+	    $combRef = join "", $ref, "\|pmid", $pmid; 
 	}
         $totalRef++;	
 	
