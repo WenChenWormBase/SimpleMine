@@ -43,7 +43,11 @@ print scalar @gene, " genes total found in ACeDB.\n";
 open (OUT1, ">GeneTissueLifeStage.csv") || die "cannot open $!\n";
 print OUT1 "WormBase Gene ID\tExpr_pattern Tissue\tGenomic Study Tissue\tExpr_pattern LifeStage\tGenomic Study LifeStage\n";
 
-my ($epAOlist, $epLSlist, $ecAOlist, $ecLSlist);
+my ($epAOlist, $epLSlist, $ecAOlist, $ecLSlist, $i);
+my @allFields;
+my @oldList;
+my @sortedList;
+
 foreach $g (@gene) {
 
     #---- get anatomy_term from Expr_pattern ------------------
@@ -113,7 +117,20 @@ foreach $g (@gene) {
 	 $ecLSlist = "N.A.";
      }
 
-    print OUT1 "$g\t$epAOlist\t$ecAOlist\t$epLSlist\t$ecLSlist\n";
+    @allFields = ();
+    @allFields = ($epAOlist, $ecAOlist, $epLSlist, $ecLSlist);
+    $i = 0;
+    print OUT1 "$g";
+    while ($i < 4) {
+	@oldList = ();
+	@sortedList = ();
+	@oldList = split ", ", $allFields[$i];
+	@sortedList = sort { lc($a) cmp lc($b) } @oldList;
+	$allFields[$i] = join ", ", @sortedList;
+	print OUT1 "\t$allFields[$i]";
+	$i++;
+    }    
+    print OUT1 "\n";
 }
 close (OUT1);
 print "Done printing Gene-Tissue-LifeStage table.\n";
