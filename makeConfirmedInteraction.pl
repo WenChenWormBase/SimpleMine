@@ -214,6 +214,7 @@ my @Int2;
 my @Int1;
 my ($allInt, $oneInt, $numEvi, $i1, $i2, $i3);
 my @eviList;
+my @sortedList;
 
 open (OUT, ">ConfirmedInteraction.csv") || die "cannot open $!\n";
 #print OUT "WormBase Gene ID\tConfirmed Interaction\n";
@@ -229,7 +230,9 @@ foreach $g (@geneList) {
 	$i3 =0;
 	
 	@tmp = split ", ", $geneInt{$g};
-	foreach $oneInt (@tmp) {
+	@sortedList = ();
+	@sortedList = sort { lc($a) cmp lc($b) } @tmp;
+	foreach $oneInt (@sortedList) {
 	    @eviList = ();
 	    @eviList = split ";", $oneInt;
 	    $numEvi = @eviList;
