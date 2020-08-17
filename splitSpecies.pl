@@ -12,7 +12,7 @@ my @headerFields;
 my %gNameExist; #check if a combination of gene id and name already exist
 my %gName; #nameline for each gene entry;
 my %gData; #dataline for each gene entry;
-my @fileList = ("1_WBGeneName.csv", "2_GeneticMapPosition.csv", "3_RNAiAllelePhenoObserved.csv", "4_GeneAllele.csv", "5_ConfirmedInteraction.csv", "6_GeneTissueLifeStage.csv", "7_GeneDiseaseHumanOrtholog.csv", "8_GeneReference.csv", "9_GeneOntologyAssociation.csv", "10_GeneDescription.csv");
+my @fileList = ("1_WBGeneName.csv", "2_GeneticMapPosition.csv", "3_RNAiAllelePhenoObserved.csv", "4_GeneAllele.csv", "5_ConfirmedInteraction.csv", "6_GeneTissueLifeStage.csv", "7_GeneDiseaseHumanOrtholog.csv", "8_GeneReference.csv", "9_1_GeneOntologyAssociation.csv", "9_2_GeneDescription.csv");
 my $filepath1 = "/home/wen/simpleMine/sourceFile/";
 
 my $i = 0; #for gene list
