@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-
 use strict;
 
 print "This script create Gene-Allele table based on an ace file dumped from the current WS release.\n"; # the dump only include sequenced allele variation objects
@@ -18,6 +17,7 @@ my ($a, $g, $alleleName, $line);
 my @tmp;
 
 open (IN, "/home/wen/simpleMine/ace_files/SequencedAllele.ace") || die "can't open SequencedAllele.ace!";
+#open (IN, "/home/wen/simpleMine/ace_files/testSequencedAllele.ace") || die "can't open SequencedAllele.ace!";
 
 
 #----- print Gene-Allele table -----
@@ -29,6 +29,7 @@ while ($line = <IN>) {
 	@tmp = ();
 	@tmp = split '"', $line;
 	$a = $tmp[1];
+	#print "Processing allele ID $a.\n";
 	$aGene{$a} = "N.A.";
 	$aName{$a} = "N.A.";
 	$aType{$a} = "N.A.";
@@ -55,7 +56,7 @@ while ($line = <IN>) {
 	    $i++;
 	    $existGene{$g} = 1;
 	}	
-    }  elsif ($line =~ /^Substitution/) {
+    } elsif ($line =~ /^Substitution/) {
 	$aType{$a} = "Substitution";
     } elsif ($line =~ /^Insertion/) {
 	$aType{$a} = "Insertion";
@@ -63,12 +64,15 @@ while ($line = <IN>) {
 	$aType{$a} = "Deletion";
     } elsif ($line =~ /^Tandem_duplication/) {
 	$aType{$a} = "Tandem_duplication";
-    } elsif ($line =~ /^Predicted_CDS/) {
+    }
+    
+    if (($line =~ /^Predicted_CDS/)||($line =~ /^Gene/)||($line =~ /^Transcript/)||($line =~ /^Pseudogene/)) {
 	if ($line =~ /Missense/) {
 	    $aMolChange{$a} = "Missense";
 	} elsif ($line =~ /Missense/) {
 	    $aMolChange{$a} = "Missense";
-	} elsif ($line =~ /Nonsense/) {
+	#} elsif ($line =~ /Nonsense/) {
+	} elsif (($line =~ /Amber_UAG/)||($line =~ /Ochre_UAA/)||($line =~ /Opal_UGA/)||($line =~ /Ochre_UAA_or_Opal_UGA/)||($line =~ /Amber_UAG_or_Ochre_UAA/)||($line =~ /Amber_UAG_or_Opal_UGA/)) {    
 	    $aMolChange{$a} = "Nonsense";
 	} elsif ($line =~ /Splice_site/) {
 	    $aMolChange{$a} = "Splice_site";
@@ -76,18 +80,19 @@ while ($line = <IN>) {
 	    $aMolChange{$a} = "Frameshift";
 	} elsif ($line =~ /Silent/) {
 	    $aMolChange{$a} = "Silent";
+	    #print "$a is a silent allele.\n";
 	} elsif ($line =~ /Coding_exon/) {
 	    $aExon{$a} = "Coding_exon";
-	} elsif ($line =~ /Intron/) {
-	    $aExon{$a} = "Intron";
-	} elsif ($line =~ /Noncoding_exon/) {
-	    $aExon{$a} = "Noncoding_exon";
-	} elsif ($line =~ /Promoter/) {
-	    $aExon{$a} = "Promoter";
-	} elsif ($line =~ /UTR_3/) {
-	    $aExon{$a} = "UTR_3";
-	} elsif ($line =~ /UTR_5/) {
-	    $aExon{$a} = "UTR_5";
+	#} elsif ($line =~ /Intron/) {
+	#    $aExon{$a} = "Intron";
+	#} elsif ($line =~ /Noncoding_exon/) {
+	#    $aExon{$a} = "Noncoding_exon";
+	#} elsif ($line =~ /Promoter/) {
+	#    $aExon{$a} = "Promoter";
+	#} elsif ($line =~ /UTR_3/) {
+	#    $aExon{$a} = "UTR_3";
+	#} elsif ($line =~ /UTR_5/) {
+	#    $aExon{$a} = "UTR_5";
 	}
     } 
 }    
@@ -98,60 +103,128 @@ print "A total of $i genes have sequenced allele information.\n";
 
 open (OUT, ">GeneAllele.csv") || die "cannot open $!\n";
 #print OUT "WormBase Gene ID\tSequenced Allele\n";
-print OUT "WormBase Gene ID\tCoding_exon Non_silent Allele\n";
+print OUT "WormBase Gene ID\tCoding_exon Non_silent Allele";
 
-my @aList; # a list of alleles for each gene
-my $p = 0; #record if the allele is already printed
+#my @aList; # a list of alleles for each gene
+#my $p = 0; #record if the allele is already printed
+my @delAllele;
+my @insAllele;
+my @subAllele;
+my @tanAllele;
+my @sortDelA;
+my @sortInsA;
+my @sortSubA;
+my @sortTanA;
+my ($aDes, $delAi, $insAi, $subAi, $tanAi, $allAlleleDes);
+
+
 foreach $g (@geneWithAllele) {
 
     #sort the list according to allele type
     @tmp = ();
-    @aList = ();
-    $i = 0; #this is for sorting @aList
-    @tmp = split ',', $geneAlleleList{$g};
-    foreach $a (@tmp) {
-	next unless ($aType{$a} eq "Deletion");
-	$aList[$i] = $a;
-	$i++;
-    } 
+#    @aList = ();
+#    $i = 0; #this is for sorting @aList
+    @tmp = split ",", $geneAlleleList{$g};
 
-    foreach $a (@tmp) {
-	next unless ($aType{$a} eq "Insertion");
-	$aList[$i] = $a;
-	$i++;
-    } 
-
-    foreach $a (@tmp) {
-	next unless ($aType{$a} eq "Substitution");
-	$aList[$i] = $a;
-	$i++;
-    }
+    @delAllele = ();
+    @insAllele = ();
+    @subAllele = ();
+    @tanAllele = ();
+    @sortDelA = ();
+    @sortInsA = ();
+    @sortSubA = ();
+    @sortTanA = ();
+    $delAi = 0;
+    $insAi = 0;
+    $subAi = 0;
+    $tanAi = 0;
     
     foreach $a (@tmp) {
-	next unless ($aType{$a} eq "Tandem_duplication");
-	$aList[$i] = $a;
-	$i++;
-    } 
-
-    #print allele table
-    print OUT "$g\t";
-    $p = 0;
-
-    foreach $a (@aList) {
 	next unless ($aName{$a});
-	#next unless ($aExon{$a} ne "Intron");
 	next unless ($aExon{$a} eq "Coding_exon");
 	next unless ($aMolChange{$a} ne "Silent");
-	#next unless ($aType{$a} ne "Tandem_duplication");
-	$alleleName = $aName{$a};
-	if ($p == 1) {
-	    print OUT ", ";
-        }	
-	#print OUT "$alleleName\|$aType{$a}\|$aMolChange{$a}\|$aExon{$a}";
-	print OUT "$alleleName\|$aType{$a}\|$aMolChange{$a}";
-	$p = 1;
-    }
-    print OUT "\n";
+	
+	$aDes = "$aName{$a}\|$aType{$a}\|$aMolChange{$a}";
+	
+	if ($aType{$a} eq "Deletion") {
+	    $delAllele[$delAi] = $aDes;
+	    $delAi++;
+	} elsif ($aType{$a} eq "Insertion") {
+	    $insAllele[$insAi] = $aDes;
+	    $insAi++;
+	} elsif  ($aType{$a} eq "Substitution") {
+	    $subAllele[$subAi] = $aDes;
+	    $subAi++;
+	} elsif  ($aType{$a} eq "Tandem_duplication") {
+	    $tanAllele[$tanAi] = $aDes;
+	    $tanAi++;
+	} 
+    } 
+
+    @sortDelA = sort @delAllele;
+    @sortInsA = sort @insAllele;
+    @sortSubA = sort @subAllele;
+    @sortTanA = sort @tanAllele;
+
+    $allAlleleDes = join ", ", @sortDelA, @sortInsA, @sortSubA, @sortTanA;
+    print OUT "\n$g\t$allAlleleDes";
+    
+#    foreach $a (@tmp) {
+#	next unless ($aName{$a});
+#	next unless ($aExon{$a} eq "Coding_exon");
+#	next unless ($aMolChange{$a} ne "Silent");
+#	
+#	next unless ($aType{$a} eq "Deletion");
+#	$aList[$i] = $a;
+#	$i++;
+#    } 
+#
+#    foreach $a (@tmp) {
+#	next unless ($aName{$a});
+#	next unless ($aExon{$a} eq "Coding_exon");
+#	next unless ($aMolChange{$a} ne "Silent");
+#
+#	next unless ($aType{$a} eq "Insertion");
+#	$aList[$i] = $a;
+#	$i++;
+#    } 
+
+#    foreach $a (@tmp) {
+#	next unless ($aName{$a});
+#	next unless ($aExon{$a} eq "Coding_exon");	
+#	next unless ($aMolChange{$a} ne "Silent");
+#
+#	next unless ($aType{$a} eq "Substitution");
+#	$aList[$i] = $a;
+#	$i++;
+#    }
+    
+#    foreach $a (@tmp) {
+#	next unless ($aName{$a});
+#	next unless ($aExon{$a} eq "Coding_exon");
+#	next unless ($aMolChange{$a} ne "Silent");
+#
+#	next unless ($aType{$a} eq "Tandem_duplication");
+#	$aList[$i] = $a;
+#	$i++;
+#   } 
+#
+    
+    #print allele table
+
+    
+#    $p = 0;
+#    foreach $a (@aList) {
+#	if ($aMolChange{$a} ne "Silent") {
+#	    $alleleName = $aName{$a};
+#	    if ($p == 1) {
+#		print OUT ", $alleleName\|$aType{$a}\|$aMolChange{$a}";
+#	    } else {	
+#		print OUT "\n$g\t$alleleName\|$aType{$a}\|$aMolChange{$a}";
+#		$p = 1;
+#	    }
+#	}
+#    }
 }
 close (OUT);
 print "Done printing Gene-Allele table.\n";
