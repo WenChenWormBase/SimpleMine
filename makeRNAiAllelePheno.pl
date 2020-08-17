@@ -34,8 +34,8 @@ print scalar @alleleGene, " genes found with Allele.\n";
 
 #------------------Build Phenotype Description table ------------
 
-open (OUT, ">RNAiAllelePheno.csv") || die "cannot open $!\n";
-print OUT "WormBase Gene ID\tRNAi Phenotype Observed\tRNAi Phenotype Not Observed\tAllele Phenotype Observed\tAllele Phenotype Not Observed\n";
+#open (OUT, ">RNAiAllelePheno.csv") || die "cannot open $!\n";
+#print OUT "WormBase Gene ID\tRNAi Phenotype Observed\tRNAi Phenotype Not Observed\tAllele Phenotype Observed\tAllele Phenotype Not Observed\n";
 
 open (OUT1, ">RNAiAllelePhenoObserved.csv") || die "cannot open $!\n";
 print OUT1 "WormBase Gene ID\tRNAi Phenotype Observed\tAllele Phenotype Observed\n";
@@ -46,6 +46,11 @@ my @gene = $db->find($query);
 print scalar @gene, " genes total found in ACeDB.\n";
 
 my ($RNAiPhe, $RNAiNotPhe, $AllelePhe, $AlleleNotPhe);
+
+my @allFields;
+my @oldList;
+my @sortedList;
+
 
 foreach $g (@gene) {
     if ($gRNAi{$g}) {
@@ -101,11 +106,25 @@ foreach $g (@gene) {
 	$AllelePhe = "N.A.";
 	$AlleleNotPhe = "N.A.";
     }
-    print OUT "$g\t$RNAiPhe\t$RNAiNotPhe\t$AllelePhe\t$AlleleNotPhe\n";
-    print OUT1 "$g\t$RNAiPhe\t$AllelePhe\n";
+    #print OUT "$g\t$RNAiPhe\t$RNAiNotPhe\t$AllelePhe\t$AlleleNotPhe\n";
+    #print OUT1 "$g\t$RNAiPhe\t$AllelePhe\n";
     
+    @allFields = ();
+    @allFields = ($RNAiPhe, $AllelePhe);
+    $i = 0;
+    print OUT1 "$g";
+    while ($i < 2) {
+	@oldList = ();
+	@sortedList = ();
+	@oldList = split ", ", $allFields[$i];
+	@sortedList = sort  { lc($a) cmp lc($b) } @oldList;
+	$allFields[$i] = join ", ", @sortedList;
+	print OUT1 "\t$allFields[$i]";
+	$i++;
+    }    
+    print OUT1 "\n";
 }
 
-close (OUT);
+#close (OUT);
 close (OUT1);
 $db->close();
