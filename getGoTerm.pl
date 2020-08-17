@@ -22,7 +22,7 @@ while ($line =<IN1>) {
     } elsif ($line =~ /^name: /) {
 	@tmp = split ": ", $line;
 	$goName = $tmp[1];
-	$goTerm{$go} = $goName;
+	$goTerm{$go} = "\"$goName\"";
     }
 }
 close (IN1);
@@ -58,9 +58,19 @@ print "$i genes found with GO_term.\n";
 #---- print Gene-GO_term table ----
 open (OUT, ">GeneOntologyAssociation.csv") || die "cannot open GeneOntologyAssociation.csv!\n";
 print OUT "WormBase Gene ID\tGene Ontology Association\n";
+
+my $allGoNames;
+my @goNameList;
+my @sortedGo;
 foreach $g (@geneList) {
-    if ($geneGO{$g}) {	
-	print OUT "$g\t$geneGO{$g}\n";
+    if ($geneGO{$g}) {
+	@goNameList = ();
+	@sortedGo = ();
+	@goNameList = split ", ", $geneGO{$g};
+	@sortedGo = sort { lc($a) cmp lc($b) } @goNameList;
+	$allGoNames = join ", ", @sortedGo;
+	
+	print OUT "$g\t$allGoNames\n";
     } else {
 	print "ERROR: $g has no ontology association!\n"
     }
