@@ -34,8 +34,8 @@ Create a table for Gene Ontology terms related to each gene
 11. makeGeneDescription.pl
 Create a table for Concise Description, Automatic Description and Expression Cluster Summary.
 
-12. buildSimpleMine.sh
-A shell script that operate all above perl scripts
+12. category_headers
+A header file that divide search fields into categories. Need to update this file whenever search fields are added, deleted or renamed.
 
 13. buildMultiSpecSimpleMine.sh
 Create folders for species-specific SimpleMine
@@ -43,3 +43,8 @@ Create folders for species-specific SimpleMine
 14. splitSpecies.pl
 Split source data into species-specific folders built by buildMultiSpecSimpleMine.sh
 
+15. buildSimpleMine.sh
+A shell script that operate all above perl scripts
+
+16. makeGeneNameSanitizer.pl
+Create GeneNameHistory.csv file based on GeneHistory.csv and WBGeneName.ace. This is for the Gene Name Sanitizer tool. 
