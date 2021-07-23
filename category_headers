@@ -1,0 +1,5 @@
+Names, Identifiers, Sequences, Species	WormBase Gene ID	Public Name	Species	Biotype	Sequence Name	Other Name	Transcript	Operon	WormPep	Protein Domain	UniProt	Reference UniProt ID	TreeFam	RefSeq_mRNA	RefSeq_protein
+Genetics, Phenotypes, Interactions	Genetic Map Position	RNAi Clone	RNAi Phenotype Observed	Allele Phenotype Observed	Coding_exon Non_silent Allele	Interacting Gene									
+Expression	Expr_pattern Tissue	Genomic Study Tissue	Expr_pattern LifeStage	Genomic Study LifeStage										
+Human Orthologs and Disease	Disease Info	Human Ortholog												
+Functional Annotation and References	Gene Ontology Association	Concise Description	Automated Description	Expression Cluster Summary	Reference									
