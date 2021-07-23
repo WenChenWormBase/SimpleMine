@@ -1,19 +1,19 @@
 Simple Mine building pipeline
 
 1. dumpWS_Gene_ace.sh
-dump out ace files for WBGeneName.csv
+Dump out ace files for WBGeneName.csv
 
 2. make_WBGene_table.pl
-create WBGeneName.csv from the ace files
+Create WBGeneName.csv and GeneHistory.csv from the ace files
 
 3. makeRNAiAllelePheno.pl
-create RNAi and Allele phenotype table
+Create RNAi and Allele phenotype table
 
 4. makeGeneTissueLifeStage.pl
-create tissue and life stage table 
+Create tissue and life stage table 
 
 5. makeHomologDiseaseAssociation.pl
-create disease association and human homolog table
+Create disease association and human homolog table
 
 6. getGeneReference.pl
 Create a table with WBPaper ID and PubMed ID for each gene
@@ -35,7 +35,7 @@ Create a table for Gene Ontology terms related to each gene
 Create a table for Concise Description, Automatic Description and Expression Cluster Summary.
 
 12. category_headers
-A header file that divide search fields into categories. Need to update this file whenever search fields are added, deleted or renamed.
+A header file that divides search fields into categories. Need to update this file whenever search fields are added, deleted or renamed.
 
 13. buildMultiSpecSimpleMine.sh
 Create folders for species-specific SimpleMine
