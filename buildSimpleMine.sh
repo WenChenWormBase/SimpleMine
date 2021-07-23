@@ -1,17 +1,10 @@
+cd /home/wen/simpleMine/
+/home/wen/simpleMine/bin/buildMultiSpecSimpleMine.sh
 mkdir /home/wen/simpleMine/sourceFile/
 mkdir /home/wen/simpleMine/sourceFile/obsolete/
-mkdir /home/wen/simpleMine/GeneNameSanitizer/ 
-mkdir multiSpeSimpleMine/b_malayi
-mkdir multiSpeSimpleMine/c_briggsae
-mkdir multiSpeSimpleMine/c_brenneri
-mkdir multiSpeSimpleMine/c_elegans
-mkdir multiSpeSimpleMine/c_japonica
-mkdir multiSpeSimpleMine/c_remanei
-mkdir multiSpeSimpleMine/p_pacificus
-mkdir multiSpeSimpleMine/o_volvulus
-mkdir multiSpeSimpleMine/s_ratti
-mkdir multiSpeSimpleMine/mix
+mkdir /home/wen/simpleMine/GeneNameSanitizer/
 
+cd /home/wen/simpleMine/sourceFile/
 /home/wen/simpleMine/bin/dumpWS_Gene_ace.sh
 /home/wen/simpleMine/bin/make_WBGene_table.pl
 /home/wen/simpleMine/bin/getGeneReference.pl
@@ -23,7 +16,6 @@ mkdir multiSpeSimpleMine/mix
 /home/wen/simpleMine/bin/makeGeneAlleleTable.pl
 /home/wen/simpleMine/bin/makeGeneMap.pl
 /home/wen/simpleMine/bin/makeGeneDescription.pl
-
 mv RNAiAllelePheno.csv obsolete/.
 cp WBGeneName.csv 1_WBGeneName.csv
 mv GeneticMapPosition.csv 2_GeneticMapPosition.csv
@@ -33,7 +25,10 @@ mv ConfirmedInteraction.csv 5_ConfirmedInteraction.csv
 mv GeneTissueLifeStage.csv 6_GeneTissueLifeStage.csv
 mv GeneDiseaseHumanOrtholog.csv 7_GeneDiseaseHumanOrtholog.csv
 mv GeneReference.csv 8_GeneReference.csv
-mv GeneOntologyAssociation.csv 9_1_GeneOntologyAssociation.csv
-mv GeneDescription.csv 9_2_GeneDescription.csv
+mv GeneOntologyAssociation.csv 9_GeneOntologyAssociation.csv
+mv GeneDescription.csv 10_GeneDescription.csv
+
+/home/wen/simpleMine/bin/makeGeneNameSanitizer.pl
+mv GeneNameHistory.csv /home/wen/simpleMine/GeneNameSanitizer/.
 
 /home/wen/simpleMine/bin/splitSpecies.pl
