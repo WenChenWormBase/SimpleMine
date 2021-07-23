@@ -11,6 +11,10 @@ print "Input file: /home/wen/simpleMine/ace_files/WBGeneTranscript.ace\n";
 print "Input file: /home/wen/simpleMine/ace_files/WBGeneOperon.ace\n";
 print "Input file: /home/wen/simpleMine/ace_files/WormPepLive.ace\n";
 print "Input file: /home/wen/simpleMine/ace_files/WBGeneSpe.ace\n";
+print "Input file: /home/wen/simpleMine/ace_files/WBGeneBiotype.ace\n";
+print "Input file: /home/wen/simpleMine/ace_files/SO_name.ace\n";
+print "Input file: /home/wen/simpleMine/ace_files/ce_product2gene.txt\n";
+print "Input file: /home/wen/simpleMine/ace_files/PCR_product.ace\n";
 print "Output file: WBGeneName.csv, GeneHistory.csv\n\n";
 
 print "Parse Gene names ...";
@@ -50,6 +54,45 @@ close (SPE);
 #---- Done getting Species information -------------------
 
 
+#------------- Get Biotype ---------------------------------------------
+my ($soTerm, $soName);
+my %soTermName;
+my %geneBioType;
+open (SON, "/home/wen/simpleMine/ace_files/SO_name.ace") || die "can't open SO_name.ace!";
+my $totalSO = 0;
+while ($line=<SON>) {
+    @tmp = ();  
+    if ($line =~ /^SO_term/) {
+	@tmp = split '"', $line;
+	$soTerm = $tmp[1];	
+    } elsif ($line =~ /^SO_name/) {
+	@tmp = split '"', $line;
+	$soName = $tmp[1];
+	$soTermName{$soTerm} = $soName;
+	$totalSO++;
+    }
+}
+close (SON);
+print "Found $totalSO SO_term in WS.\n";
+
+open (BIO, "/home/wen/simpleMine/ace_files/WBGeneBiotype.ace") || die "can't open WBGeneBiotype.ace!";
+while ($line=<BIO>) {
+    @tmp = ();  
+    if ($line =~ /^Gene/) {
+	@tmp = split '"', $line;
+	$g = $tmp[1];
+    } elsif ($line =~ /^Biotype/) {	
+	@tmp = split '"', $line;
+	$soTerm = $tmp[1];
+	if ($soTermName{$soTerm}) {
+	    $soName = $soTermName{$soTerm};
+	    $geneBioType{$g} = $soName;	    
+	}
+    }
+}
+close (BIO);
+
+#----- Done getting biotype information ------
 
 #------------- Get transcript names ---------------------------------------------
 
@@ -102,8 +145,7 @@ close (PEP);
 
 
 #------------- Get operon names ---------------------------------
-open (OPE, "/home/wen/simpleMine/ace_files/WBGeneOperon.ace") || die "can't open
- WBGeneOperon.ace!";
+open (OPE, "/home/wen/simpleMine/ace_files/WBGeneOperon.ace") || die "can't open WBGeneOperon.ace!";
 while ($line=<OPE>) {
     @tmp = ();  
     if ($line =~ /^Gene/) {
@@ -121,6 +163,64 @@ while ($line=<OPE>) {
 }
 close (OPE);
 #--------------------------- done getting operon names -------------
+
+
+
+#------ Get RNAi clone names (PCR_product/SMD primer) -----
+
+my ($rnai, $arID, $genenamestring, $rnaiString);
+my %rnaiAR; #from pcr product to Ahringer ID
+my %gRNAi; #from gene to pcr product
+my $totalRNAiID = 0;
+
+open (CLO, "/home/wen/simpleMine/ace_files/PCR_product.ace") || die "can't open PCR_product.ace!";
+while ($line = <CLO>) {
+    chomp ($line);
+    if ($line =~ /^Clone/) {
+	$rnai = "";
+	$arID = "";
+    } elsif ($line =~ /^PCR_product/) {
+	@tmp = ();
+	@tmp = split '"', $line;
+	$rnai = $tmp[1];
+    } elsif ($line =~ /^Database/) {
+	@tmp = ();
+	@tmp = split '"', $line;
+	$arID = $tmp[5];	
+    } elsif ($line eq "") {
+	if (($rnai ne "") && ($arID ne "")) {
+	    if ($rnaiAR{$rnai}) {
+		$rnaiAR{$rnai} = join "\|", $rnaiAR{$rnai}, $arID;
+	    } else {
+		$rnaiAR{$rnai} = $arID;
+		$totalRNAiID++;
+	    }
+	}
+    }
+}
+close (CLO);
+print "$totalRNAiID PCR products have Ahringer IDs.\n";
+
+open (RNAI, "/home/wen/simpleMine/ace_files/ce_product2gene.txt") || die "can't open ce_product2gene.txt!";
+while ($line=<RNAI>) {
+    ($rnai, $genenamestring) = split /\t/, $line;
+    if ($rnaiAR{$rnai}) {
+	$rnaiString = join "\|", $rnai, $rnaiAR{$rnai};
+    } else {
+	$rnaiString = $rnai;
+    }
+    @tmp = ();  
+    @tmp = split '\(', $genenamestring;
+    $g = $tmp[0];
+    if ($gRNAi{$g}) {
+	$gRNAi{$g} = join ", ", $gRNAi{$g}, $rnaiString;
+    } else {
+	$gRNAi{$g} = $rnaiString;
+    }
+}
+close (RNAI);
+#------------- done getting RNAi clone names ------------ 
+
 
 #---------------- Get Public names ------------------------------------
 open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't open WBGeneIdentity.ace!";
@@ -174,12 +274,13 @@ close (IN);
 
 open (IN, "/home/wen/simpleMine/ace_files/WBGeneIdentity.ace") || die "can't open WBGeneIdentity.ace!";
 open (OUT, ">WBGeneName.csv") || die "cannot open WBGeneName.csv!\n";
-open (CEG, ">AllCelegansGenes.txt") || die "cannot open AllCelegansGenes.txt!\n";
 open (CON, ">GeneHistory.csv") || die "cannot open ConflictingNameGenes.txt!\n";
 
 print CON "Gene Name\tPublic Name\tStatus\tSpecies\tIdentifier\tSplit Into\tMerged Into\tHistory\n";
 
-print OUT "WormBase Gene ID\tPublic Name\tSpecies\tSequence Name\tOther Name\tTranscript\tOperon\tWormPep\tProtein Domain\tUniProt\tReference UniProt ID\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
+#print OUT "WormBase Gene ID\tPublic Name\tSpecies\tSequence Name\tOther Name\tTranscript\tOperon\tWormPep\tProtein Domain\tUniProt\tReference UniProt ID\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\n";
+print OUT "WormBase Gene ID\tPublic Name\tSpecies\tBiotype\tSequence Name\tOther Name\tTranscript\tOperon\tWormPep\tProtein Domain\tUniProt\tReference UniProt ID\tTreeFam\tRefSeq_mRNA\tRefSeq_protein\tRNAi Clone\n";
+
 
 my $id = 0;
 my $id_a = 0;
@@ -294,7 +395,6 @@ while ($line =<IN>) {
 	}
 
 	$id_a++;
-	#print ALIAS "$id_a\t$mol_name\t$g\n";
     } elsif ($line =~ /^Public_name/) {
 	@tmp = split '"', $line;
 	$pub_name = $tmp[1];
@@ -336,17 +436,11 @@ while ($line =<IN>) {
 	}
     }  elsif ($line =~ /TREEFAM/) {
 	@tmp = split '"', $line;
-
 	$id_a++;
-	#print ALIAS "$id_a\t$tmp[5]\t$g\n";
-
 	$treefam = $tmp[5];
     }  elsif (($line =~ /RefSeq/) && ($line =~ /mRNA/)) {
 	@tmp = split '"', $line;
-
-	$id_a++;
-	#print ALIAS "$id_a\t$tmp[5]\t$g\n";
-	
+	$id_a++;	
 	if ($refSeqRNA eq "N.A.") {
 	    $refSeqRNA = $tmp[5];
 	} else {
@@ -354,10 +448,7 @@ while ($line =<IN>) {
 	}
     }  elsif (($line =~ /RefSeq/) && ($line =~ /protein/)) {
 	@tmp = split '"', $line;
-
 	$id_a++;
-	#print ALIAS "$id_a\t$tmp[5]\t$g\n";
-
 	if ($refSeqProtein eq "N.A.") {
 	    $refSeqProtein = $tmp[5];
 	} else {
@@ -381,50 +472,31 @@ while ($line =<IN>) {
 	} else {
 	    $spe = "N.A.";
 	}
+	
+	if ($geneBioType{$g}) {
+	    $soName = $geneBioType{$g};
+	} else {
+	    $soName = "N.A.";
+	}
+
+
+	if ($gRNAi{$g}) {
+	    $rnai= $gRNAi{$g};
+	} else {
+	    $rnai = "N.A.";
+	}
+
+	if ($status ne "Dead") {	    #print OUT "$g\t$pub_name\t$spe\t$seq_name\t$other_name\t$cds\t$ope\t$allWormpep\t$allMotif\t$uniprot\t$uniprotRef\t$treefam\t$refSeqRNA\t$refSeqProtein\n";
+	    print OUT "$g\t$pub_name\t$spe\t$soName\t$seq_name\t$other_name\t$cds\t$ope\t$allWormpep\t$allMotif\t$uniprot\t$uniprotRef\t$treefam\t$refSeqRNA\t$refSeqProtein\t$rnai\n";
+	}
 
 	if ($status eq "Live") {
-	    print OUT "$g\t$pub_name\t$spe\t$seq_name\t$other_name\t$cds\t$ope\t$allWormpep\t$allMotif\t$uniprot\t$uniprotRef\t$treefam\t$refSeqRNA\t$refSeqProtein\n";
-
-	    #next unless ($spe eq "Caenorhabditis elegans"); #only document C. elegans genes
-	    #$ceGenes[$ceID] = $g;
-	    #$ceID++;	
-
-	    #if ($conflictName ne "N.A.") { #print ambiguous gene ids
-		#$nameStatus{$conflictName} = "Ambiguous"; 
-		#print CON "$conflictName\t\tPublic Name for $pubName{$conflictName}. May also refer to $pub_name\($g\). History of $g: $history\t\n";
-	    #}
-
 	    if ($splitGene{$g}) {
-		print CON "$g\t$pub_name\t$status\t$spe\tLive - Split\t$splitInto\t$mergeInto\tSplit into $splitGene{$g}. History of $g: $history\t\n";		
-		#print CON "$pub_name\t\tSplit into $splitGene{$g}. History of $pub_name\($g\): $history\t\n";
-		#$nameStatus{$pub_name} = "Ambiguous";		
-		#if (($seq_name ne $pub_name) && ($seq_name ne "N.A.")) {
-		    #print CON "$seq_name\t\tSplit into $splitGene{$g}. History of $seq_name\($g\): $history\t\n";
-		    #$nameStatus{$seq_name} = "Ambiguous";	
-		#}
-	    #} elsif ($shareSeqName{$seq_name}) {
-		#two genes share the same sequence name
-        	#print CON "$g\t$status\t$spe\tAmbiguous - Share Sequence\tTwo Genes share the same sequence: $shareSeqName{$seq_name}\t\n";
-	        #print CON "$seq_name\t\tTwo Genes share the same sequence: $shareSeqName{$seq_name}.\t\n";		
-		#$nameStatus{$seq_name} = "Ambiguous";
-		#if ($pub_name ne "$seq_name") {
-		    #print CON "$pub_name\t\tTwo Genes share the same sequence: $shareSeqName{$seq_name}.\t\n";
-		    #$nameStatus{$pub_name} = "Ambiguous";
-		#}		
+		print CON "$g\t$pub_name\t$status\t$spe\tLive - Split\t$splitInto\t$mergeInto\tSplit into $splitGene{$g}. History of $g: $history\t\n";				
 	    } else {
 		print CON "$g\t$pub_name\t$status\t$spe\tLive - Unique\t$splitInto\t$mergeInto\t$history\n"; #print valid gene ids
 	    }
-
-	    #---------------------------------------
-	    #$getAllNames{$g} = join ", ", $pub_name, $seq_name, $other_name;
-	    #-------------------------------------------
-	    
-	} else { #print obsolete gene ids
-	    #if (($pub_name ne "N.A.")&& ($spe eq "Caenorhabditis elegans")) {
-		#$deadGeneName[$di] = $pub_name;
-		#$di++;
-		#$deadGeneDes{$pub_name} = "$status gene. History of $pub_name\($g\): $history"
-	    #}
+	} else {
 	    print CON "$g\t$pub_name\t$status\t$spe\tObsolete - $status\t$splitInto\t$mergeInto\t$history";
 	    if ($geneRemark{$g}) {
 	       print CON ". Remark: $geneRemark{$g}\n";
@@ -432,88 +504,9 @@ while ($line =<IN>) {
 	       print CON "\n";
 	    }
 	}
-
     }
 }
 close (IN);
 close (OUT);
-#print "Found $di dead gene with public names.\n";
-
-#my @allNames;
-#my $genename;
-#foreach $g (@ceGenes) {
-    #print CEG "$g\n";
-    #next unless ($getAllNames{$g});
-    #@allNames = ();
-    #$genename = "";
-    #@allNames = split ", ", $getAllNames{$g};
-    #foreach $genename (@allNames) {
-	#next unless ($genename ne "N.A.");
-	#if ($nameStatus{$genename}) {	    
-	    #skip, this name was already printed 
-	#} else {
-	    #print CON "$genename\t$g\t\t\n";
-	    #$nameStatus{$genename} = "Printed as Valid";
-	#} 
-    #}
-#}
-#print "$ceID C. elegans genes found.\n";
-
-#foreach $genename (@deadGeneName) {
-    #if ($nameStatus{$genename}) {
-	#this name was already used by a Live gene
-    #} else {
-	#print CON "$genename\t\t\t$deadGeneDes{$genename}\n";
-	#$nameStatus{$genename} = "Printed as Obsolete";
-    #}
-#}
-
-close (CEG);
 close (CON);
 print "Done.\n";
-
-
-#---------- print the rest of valide gene names -------
-#open (IN, "/home/wen/simpleMine/ace_files/WBGeneName.ace") || die "can't open WBGeneName.ace!";
-#my ($genename, $nameMatch);
-#my %nameGene;
-#my @validGeneName;
-#my $vi = 0;
-#while ($line =<IN>) {
-#    chomp($line);
-#    @tmp = ();  
-#    if ($line =~ /^Gene_name/) {
-#	@tmp = split '"', $line;
-#	$genename = $tmp[1];
-#	$g = "N.A.";
-#	$nameMatch = 0;
-#    } elsif ($line =~ /WBGene/) {
-#	@tmp = split '"', $line;
-#	if ($g eq "N.A.") {
-#	    next unless ($nameStatus{$tmp[1]}); #only consider live gene ids
-#	    $g = $tmp[1];
-#	    $nameMatch++;
-#	} elsif ($g eq $tmp[1])  {
-#	    #skip, this gene id is already documented
-#	} else {
-#	    #this is a name with multiple match
-#	    if ($nameStatus{$genename}) {
-#		#This name was already documented as an ambigous name. 
-#	    } else {
-		#print "$genename has multiple id match but not recorded as an ambiguous name.\n";
-#	    }
-#	} 
-#    } elsif ($line eq "") {
-#	if ($nameMatch == 1) {
-	    #print CON "$genename\t$g\t\t\n";
-	    #$nameGene{$genename} = $g;
-	    #$validGeneName{$vi} = $genename;
-	    #$vi++;
-#	}
-#	$genename = "";
-#    }
-#}
-#print "Printed $vi names that match only one WormBase gene id.\n";
-#close (IN);
-
-
