@@ -9,3 +9,5 @@ mkdir multiSpeSimpleMine/p_pacificus
 mkdir multiSpeSimpleMine/o_volvulus
 mkdir multiSpeSimpleMine/s_ratti
 mkdir multiSpeSimpleMine/mix
+cp /home/wen/simpleMine/bin/category_headers multiSpeSimpleMine/.
+
