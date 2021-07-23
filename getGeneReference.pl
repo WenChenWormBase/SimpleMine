@@ -38,10 +38,12 @@ my %paperPrimary;
 my ($gene, $ref, $totalRef, $geneRef, $genePubMedRef, $combRef);
 
 #get the list of all primary research articles
-$query="QUERY FIND Paper Type = Journal_article";
+#$query="QUERY FIND Paper Type = Journal_article";
+$query="QUERY FIND Paper";
 my @paperList = $db->find($query);
 foreach $paper (@paperList) {
-    $paperPrimary{$paper} = "PRA"; #primary research article
+    #$paperPrimary{$paper} = "PRA"; #primary research article
+    $paperPrimary{$paper} = "ANY";
 }
 
 
@@ -50,7 +52,8 @@ open (OUT, ">GeneReference.csv") || die "cannot open $!\n";
 #print OUT "WormBase Gene ID\tReference Count\tWB Paper ID\tPubMed ID\n";
 print OUT "WormBase Gene ID\tReference\n";
 
-$query="QUERY FIND Paper Type = Journal_article; follow Gene";
+#$query="QUERY FIND Paper Type = Journal_article; follow Gene";
+$query="QUERY FIND Paper; follow Gene";
 my @geneList = $db->find($query);
 foreach $gene (@geneList) {
     $totalRef = 0;
