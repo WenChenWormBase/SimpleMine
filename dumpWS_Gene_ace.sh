@@ -1,8 +1,11 @@
 #!/bin/csh
 
-#------- prepare disease association and homolog files -----------------
+#------- prepare flat files -----------------
 cd /home/wen/simpleMine/ace_files/
 rm /home/wen/simpleMine/ace_files/*
+#cp /home/wen/simpleMine/bin/OpenBiosystemsRNAiLibrary.csv /home/wen/simpleMine/ace_files/.
+cp /home/citace/WS/species/c_elegans/PRJNA13758/annotation/c_elegans.PRJNA13758.WS*.pcr_product2gene.txt.gz /home/wen/simpleMine/ace_files/ce_product2gene.txt.gz
+gunzip /home/wen/simpleMine/ace_files/ce_product2gene.txt.gz
 cp /home/citace/WS/species/c_elegans/PRJNA13758/annotation/c_elegans.PRJNA13758.WS*.orthologs.txt.gz /home/wen/simpleMine/ace_files/ce_orthologs.txt.gz
 gunzip /home/wen/simpleMine/ace_files/ce_orthologs.txt.gz
 cp /home/citace/WS/species/c_elegans/PRJNA13758/annotation/c_elegans.PRJNA13758.WS*.interactions.txt.gz /home/wen/simpleMine/ace_files/ce_interaction.txt.gz
@@ -11,6 +14,8 @@ cp /home/citace/WS/ONTOLOGY/gene_association.WS*.wb /home/wen/simpleMine/ace_fil
 cp /home/citace/WS/ONTOLOGY/gene_ontology.WS*.obo /home/wen/simpleMine/ace_files/gene_ontology.obo
 #cp /home/citace/WS/ONTOLOGY/disease_association.WS*.wb /home/wen/simpleMine/ace_files/disease_association.wb
 cat /home/wen/AutoDescription/ecSummary/*.csv > /home/wen/simpleMine/ace_files/allECreg.csv
+
+
 
 #-------------prepare ace files for PCL file generation---------------------
 cd /home/wen/simpleMine/
@@ -25,6 +30,11 @@ show -a -t Species -f ace_files/WBGeneSpe.ace
 show -a -t Structured_description -f ace_files/WBGeneDescription.ace
 show -a -t Molecular_info -f ace_files/WBGeneTranscript.ace
 show -a -t Contained_in_operon -f ace_files/WBGeneOperon.ace
+show -a -t Biotype -f ace_files/WBGeneBiotype.ace
+QUERY FIND Clone PCR_product = *;
+show -a -f ace_files/PCR_product.ace
+QUERY FIND SO_term;
+show -a -t SO_name -f ace_files/SO_name.ace
 QUERY FIND Protein; WormPep AND Live 
 show -a -t Motif_homol -f ace_files/WormPepLive.ace
 QUERY FIND Variation Variation_type = *allele; Sequenced
@@ -33,5 +43,7 @@ QUERY FIND Interaction Predicted AND Log_likelihood_score > 1.5
 show -a -t Interactor_overlapping_gene -f ace_files/WSInt.ace
 QUERY FIND Gene Map_info = *
 show -a -t Map_info -f ace_files/WBGeneMap.ace
+QUERY FIND Gene_name
+show -a -f ace_files/WBGeneName.ace
 quit
 END_TACE
