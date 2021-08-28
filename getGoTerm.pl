@@ -45,7 +45,7 @@ while ($line=<IN2>) {
     #$goDes = join ":", $go, $goTerm{$go};
     $goDes = $goTerm{$go};    
     if ($geneGO{$g}) {
-	$geneGO{$g} = join ", ", $geneGO{$g}, $goDes; 
+	$geneGO{$g} = join "-----", $geneGO{$g}, $goDes; 
     } else {
 	$geneGO{$g} = $goDes;
 	$geneList[$i] = $g;
@@ -66,7 +66,7 @@ foreach $g (@geneList) {
     if ($geneGO{$g}) {
 	@goNameList = ();
 	@sortedGo = ();
-	@goNameList = split ", ", $geneGO{$g};
+	@goNameList = split "-----", $geneGO{$g};
 	@sortedGo = sort { lc($a) cmp lc($b) } @goNameList;
 	$allGoNames = join ", ", @sortedGo;
 	
