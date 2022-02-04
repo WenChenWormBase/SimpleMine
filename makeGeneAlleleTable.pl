@@ -17,12 +17,13 @@ my ($a, $g, $alleleName, $line);
 my @tmp;
 
 open (IN, "/home/wen/simpleMine/ace_files/SequencedAllele.ace") || die "can't open SequencedAllele.ace!";
-#open (IN, "/home/wen/simpleMine/ace_files/testSequencedAllele.ace") || die "can't open SequencedAllele.ace!";
+#open (IN, "/home/wen/simpleMine/ace_files/testSequencedAllele.ace") || die "can't open testSequencedAllele.ace!";
 
 
 #----- print Gene-Allele table -----
 
 my $i = 0; #for @geneAlleleList
+my $exonNumber = 0;
 while ($line = <IN>) {
     chomp ($line);
     if ($line =~ /^Variation/) {
@@ -35,11 +36,13 @@ while ($line = <IN>) {
 	$aType{$a} = "N.A.";
 	$aMolChange{$a} = "N.A.";
 	$aExon{$a} = "N.A.";	
+	$exonNumber = 0;
     } elsif ($line =~ /^Public_name/) {
 	@tmp = ();
 	@tmp = split '"', $line;
 	$aName{$a} = $tmp[1]; #get the public allele name
     } elsif ($line =~ /^Gene/) {
+	next unless ($line =~ /WBGene/);
 	@tmp = ();
 	@tmp = split '"', $line;
 	$g = $tmp[1];
@@ -62,38 +65,40 @@ while ($line = <IN>) {
 	$aType{$a} = "Insertion";
     } elsif ($line =~ /^Deletion/) {
 	$aType{$a} = "Deletion";
+	#print "$a is deletion.\n"
     } elsif ($line =~ /^Tandem_duplication/) {
 	$aType{$a} = "Tandem_duplication";
     }
     
     if (($line =~ /^Predicted_CDS/)||($line =~ /^Gene/)||($line =~ /^Transcript/)||($line =~ /^Pseudogene/)) {
-	if ($line =~ /Missense/) {
+	if ($line =~ /missense_variant/) {
 	    $aMolChange{$a} = "Missense";
-	} elsif ($line =~ /Missense/) {
-	    $aMolChange{$a} = "Missense";
+	#} elsif ($line =~ /Missense/) {
+	#    $aMolChange{$a} = "Missense";
 	#} elsif ($line =~ /Nonsense/) {
-	} elsif (($line =~ /Amber_UAG/)||($line =~ /Ochre_UAA/)||($line =~ /Opal_UGA/)||($line =~ /Ochre_UAA_or_Opal_UGA/)||($line =~ /Amber_UAG_or_Ochre_UAA/)||($line =~ /Amber_UAG_or_Opal_UGA/)) {    
+	#} elsif (($line =~ /Amber_UAG/)||($line =~ /Ochre_UAA/)||($line =~ /Opal_UGA/)||($line =~ /Ochre_UAA_or_Opal_UGA/)||($line =~ /Amber_UAG_or_Ochre_UAA/)||($line =~ /Amber_UAG_or_Opal_UGA/)) { 
+        } elsif ($line =~ /stop_gained/) {   
 	    $aMolChange{$a} = "Nonsense";
-	} elsif ($line =~ /Splice_site/) {
-	    $aMolChange{$a} = "Splice_site";
-	} elsif ($line =~ /Frameshift/) {
+	#} elsif ($line =~ /Splice_site/) {
+	    #$aMolChange{$a} = "Splice_site";
+	} elsif ($line =~ /frameshift_variant/) {
 	    $aMolChange{$a} = "Frameshift";
-	} elsif ($line =~ /Silent/) {
-	    $aMolChange{$a} = "Silent";
+       } elsif ($line =~ /inframe_deletion/) {
+            $aMolChange{$a} = "Inframe_deletion";
+	#} elsif ($line =~ /Silent/) {
+	    #$aMolChange{$a} = "Silent";
 	    #print "$a is a silent allele.\n";
-	} elsif ($line =~ /Coding_exon/) {
-	    $aExon{$a} = "Coding_exon";
-	#} elsif ($line =~ /Intron/) {
-	#    $aExon{$a} = "Intron";
-	#} elsif ($line =~ /Noncoding_exon/) {
-	#    $aExon{$a} = "Noncoding_exon";
-	#} elsif ($line =~ /Promoter/) {
-	#    $aExon{$a} = "Promoter";
-	#} elsif ($line =~ /UTR_3/) {
-	#    $aExon{$a} = "UTR_3";
-	#} elsif ($line =~ /UTR_5/) {
-	#    $aExon{$a} = "UTR_5";
-	}
+	#} elsif ($line =~ /Coding_exon/) {
+	} elsif ($line =~ /Exon_number/) {
+	    $exonNumber++;
+	} elsif ($line =~ /Codon_change/) {
+	    $exonNumber++ ;
+	} elsif ($line =~ /Amino_acid_change/) {
+		if ($exonNumber == 2) {
+		 	$aExon{$a} = "Coding_exon";
+	        }
+        }
+	
     } 
 }    
 
@@ -142,8 +147,9 @@ foreach $g (@geneWithAllele) {
     foreach $a (@tmp) {
 	next unless ($aName{$a});
 	next unless ($aExon{$a} eq "Coding_exon");
-	next unless ($aMolChange{$a} ne "Silent");
-	
+	#next unless ($aMolChange{$a} ne "Silent");
+	next unless ($aMolChange{$a} ne "N.A.");
+
 	$aDes = "$aName{$a}\|$aType{$a}\|$aMolChange{$a}";
 	
 	if ($aType{$a} eq "Deletion") {
@@ -167,6 +173,9 @@ foreach $g (@geneWithAllele) {
     @sortTanA = sort @tanAllele;
 
     $allAlleleDes = join ", ", @sortDelA, @sortInsA, @sortSubA, @sortTanA;
+    if ($allAlleleDes eq "") {
+	$allAlleleDes = "N.A.";
+    }
     print OUT "\n$g\t$allAlleleDes";
     
 #    foreach $a (@tmp) {
