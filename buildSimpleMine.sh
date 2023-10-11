@@ -1,7 +1,6 @@
 cd /home/wen/simpleMine/
 /home/wen/simpleMine/bin/buildMultiSpecSimpleMine.sh
 mkdir /home/wen/simpleMine/sourceFile/
-mkdir /home/wen/simpleMine/sourceFile/obsolete/
 mkdir /home/wen/simpleMine/GeneNameSanitizer/
 
 cd /home/wen/simpleMine/sourceFile/
@@ -16,7 +15,6 @@ cd /home/wen/simpleMine/sourceFile/
 /home/wen/simpleMine/bin/makeGeneAlleleTable.pl
 /home/wen/simpleMine/bin/makeGeneMap.pl
 /home/wen/simpleMine/bin/makeGeneDescription.pl
-mv RNAiAllelePheno.csv obsolete/.
 cp WBGeneName.csv 1_WBGeneName.csv
 mv GeneticMapPosition.csv 2_GeneticMapPosition.csv
 mv RNAiAllelePhenoObserved.csv 3_RNAiAllelePhenoObserved.csv
