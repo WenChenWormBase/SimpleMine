@@ -26,7 +26,8 @@ my @doTermList = $db->find($query);
 foreach $doTerm (@doTermList) {
     @geneBio = ();
     @geneSeq = ();
-     $doName = $doTerm->Name;
+    next unless ($doTerm->Name);
+    $doName = $doTerm->Name;
      $DO{$doTerm} = $doName;
      #print "$doTerm - $doName\n";
      if ($doTerm->Gene_by_biology) {
