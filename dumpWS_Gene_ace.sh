@@ -4,6 +4,8 @@
 cd /home/wen/simpleMine/ace_files/
 rm /home/wen/simpleMine/ace_files/*
 #cp /home/wen/simpleMine/bin/OpenBiosystemsRNAiLibrary.csv /home/wen/simpleMine/ace_files/.
+cp /home/citace/WS/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.WS*.annotations.gff3.gz /home/wen/simpleMine/ace_files/ce.gff3.gz
+gunzip /home/wen/simpleMine/ace_files/ce.gff3.gz
 cp /home/citace/WS/species/c_elegans/PRJNA13758/annotation/c_elegans.PRJNA13758.WS*.pcr_product2gene.txt.gz /home/wen/simpleMine/ace_files/ce_product2gene.txt.gz
 gunzip /home/wen/simpleMine/ace_files/ce_product2gene.txt.gz
 cp /home/citace/WS/species/c_elegans/PRJNA13758/annotation/c_elegans.PRJNA13758.WS*.orthologs.txt.gz /home/wen/simpleMine/ace_files/ce_orthologs.txt.gz
@@ -39,8 +41,8 @@ QUERY FIND Protein; WormPep AND Live
 show -a -t Motif_homol -f ace_files/WormPepLive.ace
 QUERY FIND Variation Variation_type = *allele; Sequenced
 show -a -f ace_files/SequencedAllele.ace
-QUERY FIND Interaction Predicted AND Log_likelihood_score > 1.5 
-show -a -t Interactor_overlapping_gene -f ace_files/WSInt.ace
+QUERY FIND Interaction High_throughput 
+show -a -t High_throughput -f ace_files/HTPInt.ace
 QUERY FIND Gene Map_info = *
 show -a -t Map_info -f ace_files/WBGeneMap.ace
 QUERY FIND Gene_name
